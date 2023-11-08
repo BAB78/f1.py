@@ -11,7 +11,8 @@ enable_password = 'class123!'
 ssh_username = 'cisco'
 ssh_password = 'cisco123!'
 output_file = 'running_config.txt'  # Name of the local file to save the running configuration
-offline_config_file = 'offline_config.txt'  # Name of the local file to save the offline configuration
+offline_config_file = 'devasc/labs/prne/offline_config.txt'  # Path to the offline configuration file
+startup_config_file = 'devasc/labs/prne/startup_config.txt'  # Path to the startup configuration file
 
 # Function to handle Telnet login and command execution
 def telnet_session(ip, user, passwd, enable_pass, command):
@@ -110,11 +111,9 @@ if os.path.exists(offline_config_file):
             print(f'Removed (Offline): {line[2:]}')  # Line only in the offline config
         elif line.startswith('+ '):
             print(f'Added (Offline): {line[2:]}')  # Line only in the running config
+    print('------------------------------------------------------')
 else:
     print(f'Offline config file not found: {offline_config_file}')
-
-# Define the path to the startup configuration
-startup_config_file = 'startup_config.txt'  # Replace with the path to the startup configuration file
 
 # Load the startup configuration if it exists
 if os.path.exists(startup_config_file):
@@ -132,5 +131,6 @@ if os.path.exists(startup_config_file):
             print(f'Removed (Startup): {line[2:]}')  # Line only in the startup config
         elif line.startswith('+ '):
             print(f'Added (Startup): {line[2:]}')  # Line only in the running config
+    print('------------------------------------------------------')
 else:
     print(f'Startup config file not found: {startup_config_file}')
