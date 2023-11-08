@@ -113,7 +113,24 @@ if os.path.exists(offline_config_file):
 else:
     print(f'Offline config file not found: {offline_config_file}')
 
-# Compare the running configuration with the startup configuration
+# Define the path to the startup configuration
 startup_config_file = 'startup_config.txt'  # Replace with the path to the startup configuration file
+
+# Load the startup configuration if it exists
 if os.path.exists(startup_config_file):
-    with open
+    with open(startup_config_file, 'r') as startup_file:
+        startup_config = startup_file.read()
+
+    # Compare the running configuration with the startup configuration
+    diff_running_vs_startup = list(difflib.unified_diff(running_config_telnet.splitlines(), startup_config.splitlines()))
+
+    print('Differences between the current running configuration and the startup configuration:')
+    for line in diff_running_vs_startup:
+        if line.startswith('  '):
+            continue  # Unchanged line
+        elif line.startswith('- '):
+            print(f'Removed (Startup): {line[2:]}')  # Line only in the startup config
+        elif line.startswith('+ '):
+            print(f'Added (Startup): {line[2:]}')  # Line only in the running config
+else:
+    print(f'Startup config file not found: {startup_config_file}')
