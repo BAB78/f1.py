@@ -10,9 +10,7 @@ password = 'cisco123!'
 enable_password = 'class123!'
 ssh_username = 'cisco'
 ssh_password = 'cisco123!'
-output_file = 'running_config.txt'  # Name of the local file to save the running configuration
-offline_config_file = 'devasc/labs/prne/offline_config.txt'  # Path to the offline configuration file
-startup_config_file = 'devasc/labs/prne/startup_config.txt'  # Path to the startup configuration file
+output_file = 'running_config.txt'  # Name of the local file to save the configuration
 
 # Function to handle Telnet login and command execution
 def telnet_session(ip, user, passwd, enable_pass, command):
@@ -43,6 +41,18 @@ def telnet_session(ip, user, passwd, enable_pass, command):
         print(f'Telnet Session Failed: {e}')
         return None
 
+# Function to save a configuration to a file
+def save_config_to_file(filename, config):
+    with open(filename, 'w') as file:
+        file.write(config)
+
+# Get the current working directory
+current_dir = os.getcwd()
+
+# Build the absolute paths for the configuration files
+offline_config_file = os.path.join(current_dir, 'devasc', 'labs', 'prne', 'offline_config.txt')
+startup_config_file = os.path.join(current_dir, 'devasc', 'labs', 'prne', 'startup_config.txt')
+
 # Telnet session using the function
 running_config_telnet = telnet_session(ip_address, username, password, enable_password, 'show running-config')
 
@@ -52,9 +62,7 @@ if running_config_telnet is not None:
     print(f'Username: {username}')
 
     # Save the Telnet running configuration to a local file
-    with open(output_file, 'w') as file:
-        file.write(running_config_telnet)
-
+    save_config_to_file(output_file, running_config_telnet)
     print('Running configuration saved to', output_file)
     print('------------------------------------------------------')
 
@@ -81,9 +89,7 @@ try:
     running_config_ssh = ssh_shell.recv(65535).decode('utf-8')
 
     # Save the SSH running configuration to a local file
-    with open(output_file, 'w') as file:
-        file.write(running_config_ssh)
-
+    save_config_to_file(output_file, running_config_ssh)
     print('Running configuration saved to', output_file)
     print('------------------------------------------------------')
 
@@ -95,42 +101,44 @@ try:
 except Exception as e:
     print(f'SSH Session Failed: {e}')
 
-# Load the offline configuration
+# Load the offline configuration and the startup configuration
 if os.path.exists(offline_config_file):
     with open(offline_config_file, 'r') as offline_file:
         offline_config = offline_file.read()
-
-    # Compare the running configuration with the offline version
-    diff_running_vs_offline = list(difflib.unified_diff(running_config_telnet.splitlines(), offline_config.splitlines()))
-
-    print('Differences between the current running configuration and the offline version:')
-    for line in diff_running_vs_offline:
-        if line.startswith('  '):
-            continue  # Unchanged line
-        elif line.startswith('- '):
-            print(f'Removed (Offline): {line[2:]}')  # Line only in the offline config
-        elif line.startswith('+ '):
-            print(f'Added (Offline): {line[2:]}')  # Line only in the running config
-    print('------------------------------------------------------')
 else:
-    print(f'Offline config file not found: {offline_config_file}')
+    offline_config = None
 
-# Load the startup configuration if it exists
 if os.path.exists(startup_config_file):
     with open(startup_config_file, 'r') as startup_file:
         startup_config = startup_file.read()
+else:
+    startup_config = None
 
-    # Compare the running configuration with the startup configuration
-    diff_running_vs_startup = list(difflib.unified_diff(running_config_telnet.splitlines(), startup_config.splitlines()))
-
-    print('Differences between the current running configuration and the startup configuration:')
-    for line in diff_running_vs_startup:
+# Compare the configurations and print the differences
+if offline_config:
+    diff_offline = list(difflib.unified_diff(running_config_telnet.splitlines(), offline_config.splitlines()))
+    print('Differences between the current running configuration and the offline version:')
+    for line in diff_offline:
         if line.startswith('  '):
             continue  # Unchanged line
         elif line.startswith('- '):
-            print(f'Removed (Startup): {line[2:]}')  # Line only in the startup config
+            print(f'Removed: {line[2:]}')  # Line only in the offline config
         elif line.startswith('+ '):
-            print(f'Added (Startup): {line[2:]}')  # Line only in the running config
+            print(f'Added: {line[2:]}')  # Line only in the running config
     print('------------------------------------------------------')
 else:
-    print(f'Startup config file not found: {startup_config_file}')
+    print('Offline config file not found.')
+
+if startup_config:
+    diff_startup = list(difflib.unified_diff(running_config_telnet.splitlines(), startup_config.splitlines()))
+    print('Differences between the current running configuration and the startup configuration:')
+    for line in diff_startup:
+        if line.startswith('  '):
+            continue  # Unchanged line
+        elif line.startswith('- '):
+            print(f'Removed: {line[2:]}')  # Line only in the startup config
+        elif line.startswith('+ '):
+            print(f'Added: {line[2:]}')  # Line only in the running config
+    print('------------------------------------------------------')
+else:
+    print('Startup config file not found.')
