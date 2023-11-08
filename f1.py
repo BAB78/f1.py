@@ -86,7 +86,7 @@ try:
     print('------------------------------------------------------')
 
     # Exit enable mode
-    ssh_shell send('exit\n')
+    ssh_shell.send('exit\n')
 
     # Close SSH session
     ssh.close()
@@ -124,4 +124,6 @@ if os.path.exists(offline_config_file):
         print('Differences between the running configuration and the startup configuration:')
         for line in diff_startup
 
-print('------------------------------------------------------')
+    print('------------------------------------------------------')
+else:
+    print(f'Offline config file not found: {offline_config_file}')
