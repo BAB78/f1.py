@@ -49,9 +49,12 @@ def save_config_to_file(filename, config):
 # Get the current working directory
 current_dir = os.getcwd()
 
+# Define the path to the directory where configuration files should be stored
+config_directory = os.path.join(current_dir, 'devasc', 'labs', 'prne')
+
 # Build the absolute paths for the configuration files
-offline_config_file = os.path.join(current_dir, 'devasc', 'labs', 'prne', 'offline_config.txt')
-startup_config_file = os.path.join(current_dir, 'devasc', 'labs', 'prne', 'startup_config.txt')
+offline_config_file = os.path.join(config_directory, 'offline_config.txt')
+startup_config_file = os.path.join(config_directory, 'startup_config.txt')
 
 # Telnet session using the function
 running_config_telnet = telnet_session(ip_address, username, password, enable_password, 'show running-config')
