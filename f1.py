@@ -107,27 +107,13 @@ if os.path.exists(offline_config_file):
         if line.startswith('  '):
             continue  # Unchanged line
         elif line.startswith('- '):
-            print(f'Removed: {line[2:]}')  # Line only in the offline config
+            print(f'Removed (Offline): {line[2:]}')  # Line only in the offline config
         elif line.startswith('+ '):
-            print(f'Added: {line[2:]}')  # Line only in the running config
+            print(f'Added (Offline): {line[2:]}')  # Line only in the running config
 else:
     print(f'Offline config file not found: {offline_config_file}')
 
 # Compare the running configuration with the startup configuration
 startup_config_file = 'startup_config.txt'  # Replace with the path to the startup configuration file
 if os.path.exists(startup_config_file):
-    with open(startup_config_file, 'r') as startup_file:
-        startup_config = startup_file.read()
-
-    diff_running_vs_startup = list(difflib.unified_diff(running_config_telnet.splitlines(), startup_config.splitlines()))
-
-    print('Differences between the current running configuration and the startup configuration:')
-    for line in diff_running_vs_startup:
-        if line.startswith('  '):
-            continue  # Unchanged line
-        elif line.startswith('- '):
-            print(f'Removed: {line[2:]}')  # Line only in the startup config
-        elif line.startswith('+ '):
-            print(f'Added: {line[2:]}')  # Line only in the running config
-else:
-    print(f'Startup config file not found: {startup_config_file}')
+    with open
