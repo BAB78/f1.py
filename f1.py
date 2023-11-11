@@ -1,3 +1,10 @@
+fix this error message 
+      File "/home/devasc/labs/prne/task.py", line 125
+    for line in diff_startup
+                           ^
+SyntaxError: invalid syntax
+
+
 import telnetlib
 import paramiko
 import difflib
@@ -127,3 +134,4 @@ if os.path.exists(offline_config_file):
     print('------------------------------------------------------')
 else:
     print(f'Offline config file not found: {offline_config_file}')
+
