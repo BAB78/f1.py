@@ -95,7 +95,7 @@ except Exception as e:
     print(f'SSH Session Failed: {e}')
 
 # Set the path to the offline configuration file
-offline_config_file = 'offline_config.txt'
+offline_config_file = 'devasc/labs/prne/offline_config.txt'  # Correct path
 
 # Compare the configurations
 if os.path.exists(offline_config_file):
@@ -111,7 +111,7 @@ if os.path.exists(offline_config_file):
         print(line)
 
     # Set the path to the startup configuration file
-    startup_config_file = 'startup_config.txt'
+    startup_config_file = 'devasc/labs/prne/startup_config.txt'  # Correct path
 
     # Compare the running configuration with the startup configuration
     if os.path.exists(startup_config_file):
