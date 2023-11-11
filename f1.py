@@ -1,3 +1,6 @@
+fix error message and not print
+Offline config file not found: offline_config.txt
+
 import telnetlib
 import paramiko
 import difflib
