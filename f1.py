@@ -125,6 +125,10 @@ if os.path.exists(offline_config_file_path):
     for line in diff_offline:
         print(line)
 
+    # Save the Telnet running configuration to a local file
+    with open(output_file, 'w') as file:
+        file.write(running_config_telnet)
+
     # Set the path to the startup configuration file
     startup_config_file_path = os.path.join(offline_config_path, startup_config_file)
 
