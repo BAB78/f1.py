@@ -18,6 +18,7 @@ running_config_ssh = None
 
 # Function to handle Telnet login and command execution
 def telnet_session(ip, user, passwd, enable_pass, command):
+    global running_config_telnet
     try:
         tn = telnetlib.Telnet(ip)
         tn.read_until(b'Username: ', timeout=10)
@@ -47,6 +48,7 @@ def telnet_session(ip, user, passwd, enable_pass, command):
 
 # Function to handle SSH login and command execution
 def ssh_session(ip, user, passwd, enable_pass, command):
+    global running_config_ssh
     try:
         ssh = paramiko.SSHClient()
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -122,10 +124,10 @@ def run_ssh():
 def compare_with_hardening_advice():
     print("Placeholder for compare_with_hardening_advice function")
 
-def configure_syslog(ip, username, password, enable_password):
+def configure_syslog():
     print("Placeholder for configure_syslog function")
 
-def configure_event_logging(ip, username, password, enable_password):
+def configure_event_logging():
     print("Placeholder for configure_event_logging function")
 
 # Function to compare with start-up configuration
