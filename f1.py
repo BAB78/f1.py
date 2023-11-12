@@ -11,6 +11,8 @@ enable_password = 'class123!'
 ssh_username = 'cisco'
 ssh_password = 'cisco123!'
 output_file = 'running_config.txt'  # Name of the local file to save the configuration
+offline_config_file = 'devasc/labs/prne/offline_config.txt'  # Path to the offline configuration file
+startup_config_file = 'devasc/labs/prne/startup_config.txt'  # Path to the startup configuration file
 
 # Function to handle Telnet login and command execution
 def telnet_session(ip, user, passwd, enable_pass, command):
@@ -94,8 +96,11 @@ try:
 except Exception as e:
     print(f'SSH Session Failed: {e}')
 
-# Set the path to the offline configuration file
-offline_config_file = 'devasc/labs/prne/offline_config.txt'  # Correct path
+# Check if the offline configuration file exists, create it if not
+if not os.path.exists(offline_config_file):
+    print('Creating offline configuration file...')
+    with open(offline_config_file, 'w') as offline_file:
+        offline_file.write(running_config_telnet)
 
 # Compare the configurations
 if os.path.exists(offline_config_file):
@@ -109,9 +114,6 @@ if os.path.exists(offline_config_file):
     print('Comparison with Offline Version:')
     for line in diff_offline:
         print(line)
-
-    # Set the path to the startup configuration file
-    startup_config_file = 'devasc/labs/prne/startup_config.txt'  # Correct path
 
     # Compare the running configuration with the startup configuration
     if os.path.exists(startup_config_file):
