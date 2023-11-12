@@ -16,6 +16,48 @@ startup_config_file = 'startup_config.txt'  # Path to the startup configuration 
 running_config_telnet = None
 running_config_ssh = None
 
+# Placeholder implementations for additional functions. Replace these with your actual code.
+
+def run_telnet():
+    global running_config_telnet
+    running_config_telnet = telnet_session(ip_address, username, password, enable_password, 'show running-config')
+    print('Telnet Session:')
+    print(f'Successfully connected to: {ip_address}')
+    print(f'Username: {username}')
+
+    # Save the Telnet running configuration to a local file
+    output_file = 'telnet_running_config.txt'
+    with open(output_file, 'w') as file:
+        file.write(running_config_telnet)
+
+    print('Running configuration saved to', output_file)
+
+def run_ssh():
+    global running_config_ssh
+    running_config_ssh = ssh_session(ip_address, ssh_username, ssh_password, enable_password, 'show running-config')
+    print('SSH Session:')
+    print(f'Successfully connected to: {ip_address}')
+    print(f'Username: {ssh_username}')
+    print(f'Password: {ssh_password}')
+    print(f'Enable Password: {enable_password}')
+
+    # Save the SSH running configuration to a local file
+    output_file = 'ssh_running_config.txt'
+    with open(output_file, 'w') as file:
+        file.write(running_config_ssh)
+
+    print('Running configuration saved to', output_file)
+    print('------------------------------------------------------')
+
+def compare_with_hardening_advice():
+    print("Placeholder for compare_with_hardening_advice function")
+
+def configure_syslog(ip, username, password, enable_password):
+    print("Placeholder for configure_syslog function")
+
+def configure_event_logging(ip, username, password, enable_password):
+    print("Placeholder for configure_event_logging function")
+
 # Function to handle Telnet login and command execution
 def telnet_session(ip, user, passwd, enable_pass, command):
     try:
@@ -86,23 +128,6 @@ def ssh_session(ip, user, passwd, enable_pass, command):
         print(f'SSH Session Failed: {e}')
         return None
 
-# Placeholder implementations for additional functions. Replace these with your actual code.
-
-def run_telnet():
-    print("Placeholder for run_telnet function")
-
-def run_ssh():
-    print("Placeholder for run_ssh function")
-
-def compare_with_hardening_advice():
-    print("Placeholder for compare_with_hardening_advice function")
-
-def configure_syslog(ip, username, password, enable_password):
-    print("Placeholder for configure_syslog function")
-
-def configure_event_logging(ip, username, password, enable_password):
-    print("Placeholder for configure_event_logging function")
-
 # Function to compare with start-up configuration
 def compare_with_startup_config():
     global running_config_telnet, running_config_ssh
@@ -172,8 +197,8 @@ def display_menu():
             compare_with_hardening_advice()
         elif choice == '6':
             # Add the Telnet and SSH options
-            configure_syslog(ip_address, ssh_username, ssh_password, enable_password)
-            configure_event_logging(ip_address, ssh_username, ssh_password, enable_password)
+            configure_syslog()
+            configure_event_logging()
         elif choice == '7':
             break
         else:
