@@ -1,3 +1,10 @@
+fix error message 
+Creating offline configuration file...
+Traceback (most recent call last):
+  File "/home/devasc/labs/prne/task.py", line 102, in <module>
+    with open(offline_config_file, 'w') as offline_file:
+FileNotFoundError: [Errno 2] No such file or directory: 'devasc/labs/prne/offline_config.txt'
+
 import telnetlib
 import paramiko
 import difflib
