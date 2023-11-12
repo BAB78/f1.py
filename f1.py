@@ -121,7 +121,7 @@ if os.path.exists(offline_config_file_path):
     diff_offline = list(difflib.unified_diff(running_config_telnet.splitlines(), offline_config.splitlines()))
 
     print('------------------------------------------------------')
-    print('Comparison with Offline Version:')
+    print('i. Compare the current running configuration with the local offline version:')
     for line in diff_offline:
         print(line)
 
@@ -137,7 +137,7 @@ if os.path.exists(offline_config_file_path):
         diff_startup = list(difflib.unified_diff(running_config_telnet.splitlines(), startup_config.splitlines()))
 
         print('------------------------------------------------------')
-        print('Comparison with Startup Configuration:')
+        print('ii. Compare the current running configuration with the startup configuration:')
         for line in diff_startup:
             print(line)  # <-- Add this line
 
