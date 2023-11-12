@@ -12,7 +12,7 @@ ssh_username = 'cisco'
 ssh_password = 'cisco123!'
 offline_config_path = 'devasc/labs/prne'
 offline_config_file = 'offline_config.txt'  # Path to the offline configuration file
-startup_config_file = 'startup_config.txt'  # Path to the startup configuration file
+startup_config_file = 'start-up_config.txt'  # Path to the startup configuration file
 
 # Placeholder for Telnet and SSH running configurations
 running_config_telnet = None
@@ -108,6 +108,10 @@ def run_ssh():
 
 # Function to compare with start-up configuration
 def compare_with_startup_config():
+    global running_config_telnet
+    if running_config_telnet is None:
+        run_telnet()
+
     if running_config_telnet is not None:
         startup_config_file_path = os.path.join(offline_config_path, startup_config_file)
         if os.path.exists(startup_config_file_path):
@@ -128,6 +132,10 @@ def compare_with_startup_config():
 
 # Function to compare with local offline version
 def compare_with_offline_version():
+    global running_config_telnet
+    if running_config_telnet is None:
+        run_telnet()
+
     if running_config_telnet is not None:
         offline_config_file_path = os.path.join(offline_config_path, offline_config_file)
         if os.path.exists(offline_config_file_path):
@@ -148,6 +156,10 @@ def compare_with_offline_version():
 
 # Function to compare with Cisco device hardening advice
 def compare_with_hardening_advice():
+    global running_config_telnet
+    if running_config_telnet is None:
+        run_telnet()
+
     if running_config_telnet is not None:
         hardening_advice = fetch_hardening_advice()
 
