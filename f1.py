@@ -124,13 +124,6 @@ def run_ssh():
 def compare_with_hardening_advice():
     print("Placeholder for compare_with_hardening_advice function")
 
-def configure_syslog():
-    print("Placeholder for configure_syslog function")
-
-def configure_event_logging():
-    print("Placeholder for configure_event_logging function")
-
-# Function to compare with start-up configuration
 def compare_with_startup_config():
     global running_config_telnet, running_config_ssh
     if running_config_telnet is None:
