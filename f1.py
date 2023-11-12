@@ -97,10 +97,10 @@ def run_ssh():
 def compare_with_hardening_advice():
     print("Placeholder for compare_with_hardening_advice function")
 
-def configure_syslog():
+def configure_syslog(ip, username, password, enable_password):
     print("Placeholder for configure_syslog function")
 
-def configure_event_logging():
+def configure_event_logging(ip, username, password, enable_password):
     print("Placeholder for configure_event_logging function")
 
 # Function to compare with start-up configuration
@@ -172,8 +172,8 @@ def display_menu():
             compare_with_hardening_advice()
         elif choice == '6':
             # Add the Telnet and SSH options
-            configure_syslog()
-            configure_event_logging()
+            configure_syslog(ip_address, ssh_username, ssh_password, enable_password)
+            configure_event_logging(ip_address, ssh_username, ssh_password, enable_password)
         elif choice == '7':
             break
         else:
