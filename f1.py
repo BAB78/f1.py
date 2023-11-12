@@ -1,3 +1,25 @@
+fix this the error message 
+
+Enter your choice (1-7): 3
+Startup config file not found: devasc/labs/prne/startup_config.txt
+
+nter your choice (1-7): 4
+Traceback (most recent call last):
+  File "task.py", line 238, in <module>
+    display_menu()
+  File "task.py", line 123, in display_menu
+    compare_with_offline_version()
+  File "task.py", line 216, in compare_with_offline_version
+    diff_offline = list(difflib.unified_diff(running_config_telnet.splitlines(), offline_config.splitlines()))
+NameError: name 'running_config_telnet' is not defined
+
+5: command not found
+
+6: command not found
+
+
+
+
 import telnetlib
 import paramiko
 import difflib
