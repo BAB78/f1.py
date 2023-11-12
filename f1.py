@@ -1,10 +1,3 @@
-fix error message 
-Creating offline configuration file...
-Traceback (most recent call last):
-  File "/home/devasc/labs/prne/task.py", line 102, in <module>
-    with open(offline_config_file, 'w') as offline_file:
-FileNotFoundError: [Errno 2] No such file or directory: 'devasc/labs/prne/offline_config.txt'
-
 import telnetlib
 import paramiko
 import difflib
@@ -18,8 +11,9 @@ enable_password = 'class123!'
 ssh_username = 'cisco'
 ssh_password = 'cisco123!'
 output_file = 'running_config.txt'  # Name of the local file to save the configuration
-offline_config_file = 'devasc/labs/prne/offline_config.txt'  # Path to the offline configuration file
-startup_config_file = 'devasc/labs/prne/startup_config.txt'  # Path to the startup configuration file
+offline_config_path = 'devasc/labs/prne'
+offline_config_file = 'offline_config.txt'  # Path to the offline configuration file
+startup_config_file = 'startup_config.txt'  # Path to the startup configuration file
 
 # Function to handle Telnet login and command execution
 def telnet_session(ip, user, passwd, enable_pass, command):
@@ -103,15 +97,20 @@ try:
 except Exception as e:
     print(f'SSH Session Failed: {e}')
 
+# Check if the offline configuration directory exists, create it if not
+if not os.path.exists(offline_config_path):
+    os.makedirs(offline_config_path)
+
 # Check if the offline configuration file exists, create it if not
-if not os.path.exists(offline_config_file):
+offline_config_file_path = os.path.join(offline_config_path, offline_config_file)
+if not os.path.exists(offline_config_file_path):
     print('Creating offline configuration file...')
-    with open(offline_config_file, 'w') as offline_file:
+    with open(offline_config_file_path, 'w') as offline_file:
         offline_file.write(running_config_telnet)
 
 # Compare the configurations
-if os.path.exists(offline_config_file):
-    with open(offline_config_file, 'r') as offline_file:
+if os.path.exists(offline_config_file_path):
+    with open(offline_config_file_path, 'r') as offline_file:
         offline_config = offline_file.read()
 
     # Compare the running configuration with the offline version
@@ -137,4 +136,4 @@ if os.path.exists(offline_config_file):
 
     print('------------------------------------------------------')
 else:
-    print(f'Offline config file not found: {offline_config_file}')
+    print(f'Offline config file not found: {offline_config_file_path}')
