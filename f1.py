@@ -170,10 +170,14 @@ def display_menu():
         elif choice == '3':
             compare_with_startup_config()
         elif choice == '4':
-            compare_with_offline_version()
+            # Add the Telnet and SSH options
+            running_config_telnet = telnet_session(ip_address, username, password, enable_password, 'show running-config')
+            running_config_ssh = ssh_session(ip_address, ssh_username, ssh_password, enable_password, 'show running-config')
         elif choice == '5':
+            compare_with_startup_config()
             compare_with_hardening_advice()
         elif choice == '6':
+            # Add the Telnet and SSH options
             configure_syslog(ip_address, ssh_username, ssh_password, enable_password)
             configure_event_logging(ip_address, ssh_username, ssh_password, enable_password)
         elif choice == '7':
