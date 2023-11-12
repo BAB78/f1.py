@@ -1,25 +1,3 @@
-fix this the error message 
-
-Enter your choice (1-7): 3
-Startup config file not found: devasc/labs/prne/startup_config.txt
-
-nter your choice (1-7): 4
-Traceback (most recent call last):
-  File "task.py", line 238, in <module>
-    display_menu()
-  File "task.py", line 123, in display_menu
-    compare_with_offline_version()
-  File "task.py", line 216, in compare_with_offline_version
-    diff_offline = list(difflib.unified_diff(running_config_telnet.splitlines(), offline_config.splitlines()))
-NameError: name 'running_config_telnet' is not defined
-
-5: command not found
-
-6: command not found
-
-
-
-
 import telnetlib
 import paramiko
 import difflib
@@ -35,6 +13,9 @@ ssh_password = 'cisco123!'
 offline_config_path = 'devasc/labs/prne'
 offline_config_file = 'offline_config.txt'  # Path to the offline configuration file
 startup_config_file = 'startup_config.txt'  # Path to the startup configuration file
+
+# Placeholder for Telnet running configuration
+running_config_telnet = None
 
 # Function to handle Telnet login and command execution
 def telnet_session(ip, user, passwd, enable_pass, command):
@@ -54,6 +35,7 @@ def telnet_session(ip, user, passwd, enable_pass, command):
         tn.write(command.encode('utf-8') + b'\n')
 
         # Read until you find the end pattern or timeout
+        global running_config_telnet
         running_config_telnet = tn.read_until(b'end\r\n\r\n', timeout=30).decode('utf-8')
 
         # Close Telnet session
@@ -155,6 +137,7 @@ def display_menu():
 
 # Function to execute Telnet session
 def run_telnet():
+    global running_config_telnet
     running_config_telnet = telnet_session(ip_address, username, password, enable_password, 'show running-config')
 
     if running_config_telnet is not None:
@@ -212,49 +195,58 @@ def run_ssh():
 
 # Function to compare with start-up configuration
 def compare_with_startup_config():
-    startup_config_file_path = os.path.join(offline_config_path, startup_config_file)
-    if os.path.exists(startup_config_file_path):
-        with open(startup_config_file_path, 'r') as startup_file:
-            startup_config = startup_file.read()
+    if running_config_telnet is not None:
+        startup_config_file_path = os.path.join(offline_config_path, startup_config_file)
+        if os.path.exists(startup_config_file_path):
+            with open(startup_config_file_path, 'r') as startup_file:
+                startup_config = startup_file.read()
 
-        # Compare the running configuration with the startup configuration
-        diff_startup = list(difflib.unified_diff(running_config_telnet.splitlines(), startup_config.splitlines()))
+            # Compare the running configuration with the startup configuration
+            diff_startup = list(difflib.unified_diff(running_config_telnet.splitlines(), startup_config.splitlines()))
 
-        print('------------------------------------------------------')
-        print('Comparison with Startup Configuration:')
-        for line in diff_startup:
-            print(line)
+            print('------------------------------------------------------')
+            print('Comparison with Startup Configuration:')
+            for line in diff_startup:
+                print(line)
+        else:
+            print(f'Startup config file not found: {startup_config_file_path}')
     else:
-        print(f'Startup config file not found: {startup_config_file_path}')
+        print('Run Telnet or SSH first to fetch running configuration.')
 
 # Function to compare with local offline version
 def compare_with_offline_version():
-    offline_config_file_path = os.path.join(offline_config_path, offline_config_file)
-    if os.path.exists(offline_config_file_path):
-        with open(offline_config_file_path, 'r') as offline_file:
-            offline_config = offline_file.read()
+    if running_config_telnet is not None:
+        offline_config_file_path = os.path.join(offline_config_path, offline_config_file)
+        if os.path.exists(offline_config_file_path):
+            with open(offline_config_file_path, 'r') as offline_file:
+                offline_config = offline_file.read()
 
-        # Compare the running configuration with the offline version
-        diff_offline = list(difflib.unified_diff(running_config_telnet.splitlines(), offline_config.splitlines()))
+            # Compare the running configuration with the offline version
+            diff_offline = list(difflib.unified_diff(running_config_telnet.splitlines(), offline_config.splitlines()))
 
-        print('------------------------------------------------------')
-        print('Comparison with Offline Version:')
-        for line in diff_offline:
-            print(line)
+            print('------------------------------------------------------')
+            print('Comparison with Offline Version:')
+            for line in diff_offline:
+                print(line)
+        else:
+            print(f'Offline config file not found: {offline_config_file_path}')
     else:
-        print(f'Offline config file not found: {offline_config_file_path}')
+        print('Run Telnet or SSH first to fetch running configuration.')
 
 # Function to compare with Cisco device hardening advice
 def compare_with_hardening_advice():
-    hardening_advice = fetch_hardening_advice()
+    if running_config_telnet is not None:
+        hardening_advice = fetch_hardening_advice()
 
-    # Compare the running configuration with the hardening advice
-    diff_hardening = list(difflib.unified_diff(running_config_telnet.splitlines(), hardening_advice.splitlines()))
+        # Compare the running configuration with the hardening advice
+        diff_hardening = list(difflib.unified_diff(running_config_telnet.splitlines(), hardening_advice.splitlines()))
 
-    print('------------------------------------------------------')
-    print('Comparison with Cisco Device Hardening Advice:')
-    for line in diff_hardening:
-        print(line)
+        print('------------------------------------------------------')
+        print('Comparison with Cisco Device Hardening Advice:')
+        for line in diff_hardening:
+            print(line)
+    else:
+        print('Run Telnet or SSH first to fetch running configuration.')
 
 # Main execution
 display_menu()
