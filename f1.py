@@ -58,6 +58,8 @@ if running_config_telnet is not None:
         file.write(running_config_telnet)
 
     print('Running configuration saved to', output_file)
+    print('Running Configuration:')
+    print(running_config_telnet)
     print('------------------------------------------------------')
 
 # SSH session using paramiko
@@ -87,6 +89,8 @@ try:
         file.write(running_config_ssh)
 
     print('Running configuration saved to', output_file)
+    print('Running Configuration:')
+    print(running_config_ssh)
     print('------------------------------------------------------')
 
     # Exit enable mode
@@ -121,9 +125,12 @@ if os.path.exists(offline_config_file_path):
     for line in diff_offline:
         print(line)
 
+    # Set the path to the startup configuration file
+    startup_config_file_path = os.path.join(offline_config_path, startup_config_file)
+
     # Compare the running configuration with the startup configuration
-    if os.path.exists(startup_config_file):
-        with open(startup_config_file, 'r') as startup_file:
+    if os.path.exists(startup_config_file_path):
+        with open(startup_config_file_path, 'r') as startup_file:
             startup_config = startup_file.read()
 
         # Compare the running configuration with the startup configuration
