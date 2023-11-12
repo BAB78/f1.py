@@ -171,8 +171,8 @@ def display_menu():
             compare_with_startup_config()
         elif choice == '4':
             # Add the Telnet and SSH options
-            running_config_telnet = telnet_session(ip_address, username, password, enable_password, 'show running-config')
-            running_config_ssh = ssh_session(ip_address, ssh_username, ssh_password, enable_password, 'show running-config')
+            run_telnet()
+            run_ssh()
         elif choice == '5':
             compare_with_startup_config()
             compare_with_hardening_advice()
@@ -184,8 +184,6 @@ def display_menu():
             break
         else:
             print('Invalid choice. Please enter a number between 1 and 7.')
-
-# Rest of your functions...
 
 # Main execution
 display_menu()
