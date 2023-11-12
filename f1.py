@@ -86,6 +86,48 @@ def ssh_session(ip, user, passwd, enable_pass, command):
         print(f'SSH Session Failed: {e}')
         return None
 
+# Placeholder implementations for additional functions. Replace these with your actual code.
+
+def run_telnet():
+    global running_config_telnet
+    running_config_telnet = telnet_session(ip_address, username, password, enable_password, 'show running-config')
+    print('Telnet Session:')
+    print(f'Successfully connected to: {ip_address}')
+    print(f'Username: {username}')
+
+    # Save the Telnet running configuration to a local file
+    output_file = 'telnet_running_config.txt'
+    with open(output_file, 'w') as file:
+        file.write(running_config_telnet)
+
+    print('Running configuration saved to', output_file)
+
+def run_ssh():
+    global running_config_ssh
+    running_config_ssh = ssh_session(ip_address, ssh_username, ssh_password, enable_password, 'show running-config')
+    print('SSH Session:')
+    print(f'Successfully connected to: {ip_address}')
+    print(f'Username: {ssh_username}')
+    print(f'Password: {ssh_password}')
+    print(f'Enable Password: {enable_password}')
+
+    # Save the SSH running configuration to a local file
+    output_file = 'ssh_running_config.txt'
+    with open(output_file, 'w') as file:
+        file.write(running_config_ssh)
+
+    print('Running configuration saved to', output_file)
+    print('------------------------------------------------------')
+
+def compare_with_hardening_advice():
+    print("Placeholder for compare_with_hardening_advice function")
+
+def configure_syslog(ip, username, password, enable_password):
+    print("Placeholder for configure_syslog function")
+
+def configure_event_logging(ip, username, password, enable_password):
+    print("Placeholder for configure_event_logging function")
+
 # Function to compare with start-up configuration
 def compare_with_startup_config():
     global running_config_telnet, running_config_ssh
@@ -106,20 +148,26 @@ def compare_with_startup_config():
 
             print('------------------------------------------------------')
             print('Comparison with Startup Configuration (Telnet):')
-            for line in diff_telnet:
-                # Print only the difference, not the file path
-                if line.startswith('+ ') or line.startswith('- '):
-                    print(line)
+            if not diff_telnet:
+                print('No differences found.')
+            else:
+                for line in diff_telnet:
+                    # Print only the difference, not the file path
+                    if line.startswith('+ ') or line.startswith('- '):
+                        print(line)
 
             # Compare the running configuration with the startup configuration for SSH
             diff_ssh = list(difflib.unified_diff(running_config_ssh.splitlines(), startup_config.splitlines()))
 
             print('------------------------------------------------------')
             print('Comparison with Startup Configuration (SSH):')
-            for line in diff_ssh:
-                # Print only the difference, not the file path
-                if line.startswith('+ ') or line.startswith('- '):
-                    print(line)
+            if not diff_ssh:
+                print('No differences found.')
+            else:
+                for line in diff_ssh:
+                    # Print only the difference, not the file path
+                    if line.startswith('+ ') or line.startswith('- '):
+                        print(line)
 
         else:
             print(f'Startup config file not found.')
@@ -145,68 +193,37 @@ def compare_with_local_offline_version():
 
         print('------------------------------------------------------')
         print('Comparison with Local Offline Version (Telnet):')
-        for line in diff_telnet_offline:
-            # Print only the difference, not the file path
-            if line.startswith('+ ') or line.startswith('- '):
-                print(line)
+        if not diff_telnet_offline:
+            print('No differences found.')
+        else:
+            for line in diff_telnet_offline:
+                # Print only the difference, not the file path
+                if line.startswith('+ ') or line.startswith('- '):
+                    print(line)
 
         # Compare the running configuration with the local offline version for SSH
         diff_ssh_offline = list(difflib.unified_diff(running_config_ssh.splitlines(), offline_config.splitlines()))
 
         print('------------------------------------------------------')
         print('Comparison with Local Offline Version (SSH):')
-        for line in diff_ssh_offline:
-            # Print only the difference, not the file path
-            if line.startswith('+ ') or line.startswith('- '):
-                print(line)
+        if not diff_ssh_offline:
+            print('No differences found.')
+        else:
+            for line in diff_ssh_offline:
+                # Print only the difference, not the file path
+                if line.startswith('+ ') or line.startswith('- '):
+                    print(line)
 
     else:
         print(f'Offline config file not found.')
 
-# Function to compare with Cisco device hardening advice
-def compare_with_hardening_advice():
-    print("Placeholder for compare_with_hardening_advice function")
-
 # Function to configure syslog for event logging and monitoring
-def configure_syslog(ip, username, password, enable_password):
+def configure_syslog():
     print("Placeholder for configure_syslog function")
 
 # Function to configure event logging
-def configure_event_logging(ip, username, password, enable_password):
+def configure_event_logging():
     print("Placeholder for configure_event_logging function")
-
-# Function to run Telnet and save the running configuration
-def run_telnet():
-    global running_config_telnet
-    running_config_telnet = telnet_session(ip_address, username, password, enable_password, 'show running-config')
-    print('Telnet Session:')
-    print(f'Successfully connected to: {ip_address}')
-    print(f'Username: {username}')
-
-    # Save the Telnet running configuration to a local file
-    output_file = 'telnet_running_config.txt'
-    with open(output_file, 'w') as file:
-        file.write(running_config_telnet)
-
-    print('Running configuration saved to', output_file)
-
-# Function to run SSH and save the running configuration
-def run_ssh():
-    global running_config_ssh
-    running_config_ssh = ssh_session(ip_address, ssh_username, ssh_password, enable_password, 'show running-config')
-    print('SSH Session:')
-    print(f'Successfully connected to: {ip_address}')
-    print(f'Username: {ssh_username}')
-    print(f'Password: {ssh_password}')
-    print(f'Enable Password: {enable_password}')
-
-    # Save the SSH running configuration to a local file
-    output_file = 'ssh_running_config.txt'
-    with open(output_file, 'w') as file:
-        file.write(running_config_ssh)
-
-    print('Running configuration saved to', output_file)
-    print('------------------------------------------------------')
 
 # Function to display menu and execute selected option
 def display_menu():
@@ -233,7 +250,6 @@ def display_menu():
         elif choice == '5':
             compare_with_hardening_advice()
         elif choice == '6':
-            # Add the Telnet and SSH options
             configure_syslog()
             configure_event_logging()
         elif choice == '7':
