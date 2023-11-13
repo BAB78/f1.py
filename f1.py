@@ -56,29 +56,14 @@ def ssh_session(ip, user, passwd, enable_pass, command):
         ssh_shell.send('enable\n')
         ssh_shell.send(enable_pass + '\n')
 
-        print('SSH Session:')
-        print(f'Successfully connected to: {ip}')
-        print(f'Username: {user}')
-        print(f'Password: {passwd}')
-        print(f'Enable Password: {enable_pass}')
-
-        # Send a command to output the startup configuration
+        # Send a command to output the running configuration
         ssh_shell.send('terminal length 0\n')  # Disable paging for SSH as well
-        ssh_shell.send('show startup-config\n')
+        ssh_shell.send(command + '\n')
         running_config_ssh = ssh_shell.recv(65535).decode('utf-8')
-
-        # Save the SSH startup configuration to a local file
-        with open(offline_config_file, 'w') as file:
-            file.write(running_config_ssh)
-
-        print('Running configuration saved to', offline_config_file)
-        print('------------------------------------------------------')
-
-        # Exit enable mode
-        ssh_shell.send('exit\n')
 
         # Close SSH session
         ssh.close()
+
         return running_config_ssh
     except Exception as e:
         print(f'SSH Session Failed: {e}')
@@ -197,41 +182,11 @@ def compare_with_local_offline_version():
 
 # Function to compare with Cisco device hardening advice
 def compare_with_hardening_advice():
-    hardening_rules = [
-        "Access control lists (ACLs) should restrict unauthorized access.",
-        "Unused services should be disabled.",
-        "Strong password policies should be enforced.",
-        # Add more hardening rules as needed
-    ]
-
-    print('Cisco Device Hardening Advice:')
-    for rule in hardening_rules:
-        print(f'- {rule}')
+    print("Placeholder for compare_with_hardening_advice function")
 
 # Function to configure syslog for event logging and monitoring
 def configure_syslog(ip, username, password, enable_password):
-    syslog_server = 'syslog.example.com'  # Replace with your syslog server address
-    syslog_facility = 'local7'  # Replace with the desired syslog facility
-
-    try:
-        tn = telnetlib.Telnet(ip)
-        tn.read_until(b'Username: ', timeout=10)
-        tn.write(username.encode('utf-8') + b'\n')
-        tn.read_until(b'Password: ', timeout=10)
-        tn.write(password.encode('utf-8') + b'\n')
-        tn.read_until(b'Password: ', timeout=10)
-        tn.write(enable_password.encode('utf-8') + b'\n')
-
-        tn.write(b'configure terminal\n')
-        tn.write(f'logging host {syslog_server} {syslog_facility}\n'.encode('utf-8'))
-        tn.write(b'end\n')
-        tn.write(b'write memory\n')
-        tn.write(b'exit\n')
-
-        print(f'Syslog configured for {syslog_server} with facility {syslog_facility}')
-        tn.close()
-    except Exception as e:
-        print(f'Failed to configure syslog: {e}')
+    print("Placeholder for configure_syslog function")
 
 # Function to configure event logging
 def configure_event_logging(ip, username, password, enable_password):
