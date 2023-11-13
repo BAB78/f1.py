@@ -18,7 +18,6 @@ running_config_ssh = None
 
 # Function to handle Telnet login and command execution
 def telnet_session(ip, user, passwd, enable_pass, command):
-    global running_config_telnet
     try:
         tn = telnetlib.Telnet(ip)
         tn.read_until(b'Username: ', timeout=10)
@@ -48,7 +47,6 @@ def telnet_session(ip, user, passwd, enable_pass, command):
 
 # Function to handle SSH login and command execution
 def ssh_session(ip, user, passwd, enable_pass, command):
-    global running_config_ssh
     try:
         ssh = paramiko.SSHClient()
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -88,6 +86,48 @@ def ssh_session(ip, user, passwd, enable_pass, command):
         print(f'SSH Session Failed: {e}')
         return None
 
+# Placeholder implementations for additional functions. Replace these with your actual code.
+
+def run_telnet():
+    global running_config_telnet
+    running_config_telnet = telnet_session(ip_address, username, password, enable_password, 'show running-config')
+    print('Telnet Session:')
+    print(f'Successfully connected to: {ip_address}')
+    print(f'Username: {username}')
+
+    # Save the Telnet running configuration to a local file
+    output_file = 'telnet_running_config.txt'
+    with open(output_file, 'w') as file:
+        file.write(running_config_telnet)
+
+    print('Running configuration saved to', output_file)
+
+def run_ssh():
+    global running_config_ssh
+    running_config_ssh = ssh_session(ip_address, ssh_username, ssh_password, enable_password, 'show running-config')
+    print('SSH Session:')
+    print(f'Successfully connected to: {ip_address}')
+    print(f'Username: {ssh_username}')
+    print(f'Password: {ssh_password}')
+    print(f'Enable Password: {enable_password}')
+
+    # Save the SSH running configuration to a local file
+    output_file = 'ssh_running_config.txt'
+    with open(output_file, 'w') as file:
+        file.write(running_config_ssh)
+
+    print('Running configuration saved to', output_file)
+    print('------------------------------------------------------')
+
+def compare_with_hardening_advice():
+    print("Placeholder for compare_with_hardening_advice function")
+
+def configure_syslog():
+    print("Placeholder for configure_syslog function")
+
+def configure_event_logging():
+    print("Placeholder for configure_event_logging function")
+
 # Function to compare with start-up configuration
 def compare_with_startup_config():
     global running_config_telnet, running_config_ssh
@@ -108,125 +148,25 @@ def compare_with_startup_config():
 
             print('------------------------------------------------------')
             print('Comparison with Startup Configuration (Telnet):')
-            if not diff_telnet:
-                print('No differences found.')
-            else:
-                for line in diff_telnet:
-                    # Print only the difference, not the file path
-                    if line.startswith('+ ') or line.startswith('- '):
-                        print(line)
+            for line in diff_telnet:
+                # Print only the difference, not the file path
+                if line.startswith('+ ') or line.startswith('- '):
+                    print(line)
 
             # Compare the running configuration with the startup configuration for SSH
             diff_ssh = list(difflib.unified_diff(running_config_ssh.splitlines(), startup_config.splitlines()))
 
             print('------------------------------------------------------')
             print('Comparison with Startup Configuration (SSH):')
-            if not diff_ssh:
-                print('No differences found.')
-            else:
-                for line in diff_ssh:
-                    # Print only the difference, not the file path
-                    if line.startswith('+ ') or line.startswith('- '):
-                        print(line)
+            for line in diff_ssh:
+                # Print only the difference, not the file path
+                if line.startswith('+ ') or line.startswith('- '):
+                    print(line)
 
         else:
             print(f'Startup config file not found.')
     else:
         print('Run Telnet or SSH first to fetch running configuration.')
-
-# Function to compare with a local offline version
-def compare_with_local_offline_version():
-    global running_config_telnet, running_config_ssh
-    if running_config_telnet is None:
-        running_config_telnet = telnet_session(ip_address, username, password, enable_password, 'show running-config')
-
-    if running_config_ssh is None:
-        running_config_ssh = ssh_session(ip_address, ssh_username, ssh_password, enable_password, 'show running-config')
-
-    offline_config_file_path = os.path.join(offline_config_path, offline_config_file)
-    if os.path.exists(offline_config_file_path):
-        with open(offline_config_file_path, 'r') as offline_file:
-            offline_config = offline_file.read()
-
-        # Compare the running configuration with the local offline version for Telnet
-        diff_telnet_offline = list(difflib.unified_diff(running_config_telnet.splitlines(), offline_config.splitlines()))
-
-        print('------------------------------------------------------')
-        print('Comparison with Local Offline Version (Telnet):')
-        if not diff_telnet_offline:
-            print('No differences found.')
-        else:
-            for line in diff_telnet_offline:
-                # Print only the difference, not the file path
-                if line.startswith('+ ') or line.startswith('- '):
-                    print(line)
-
-        # Compare the running configuration with the local offline version for SSH
-        diff_ssh_offline = list(difflib.unified_diff(running_config_ssh.splitlines(), offline_config.splitlines()))
-
-        print('------------------------------------------------------')
-        print('Comparison with Local Offline Version (SSH):')
-        if not diff_ssh_offline:
-            print('No differences found.')
-        else:
-            for line in diff_ssh_offline:
-                # Print only the difference, not the file path
-                if line.startswith('+ ') or line.startswith('- '):
-                    print(line)
-
-    else:
-        print(f'Offline config file not found.')
-
-# Function to compare with Cisco device hardening advice
-def compare_with_hardening_advice():
-    global running_config_telnet, running_config_ssh
-    if running_config_telnet is None:
-        running_config_telnet = telnet_session(ip_address, username, password, enable_password, 'show running-config')
-
-    if running_config_ssh is None:
-        running_config_ssh = ssh_session(ip_address, ssh_username, ssh_password, enable_password, 'show running-config')
-
-    hardening_advice_file = 'hardening_advice.txt'  # Path to the hardening advice file
-    if os.path.exists(hardening_advice_file):
-        with open(hardening_advice_file, 'r') as advice_file:
-            hardening_advice = advice_file.read()
-
-        # Compare the running configuration with Cisco device hardening advice for Telnet
-        diff_telnet_advice = list(difflib.unified_diff(running_config_telnet.splitlines(), hardening_advice.splitlines()))
-
-        print('------------------------------------------------------')
-        print('Comparison with Cisco Device Hardening Advice (Telnet):')
-        if not diff_telnet_advice:
-            print('No differences found.')
-        else:
-            for line in diff_telnet_advice:
-                # Print only the difference, not the file path
-                if line.startswith('+ ') or line.startswith('- '):
-                    print(line)
-
-        # Compare the running configuration with Cisco device hardening advice for SSH
-        diff_ssh_advice = list(difflib.unified_diff(running_config_ssh.splitlines(), hardening_advice.splitlines()))
-
-        print('------------------------------------------------------')
-        print('Comparison with Cisco Device Hardening Advice (SSH):')
-        if not diff_ssh_advice:
-            print('No differences found.')
-        else:
-            for line in diff_ssh_advice:
-                # Print only the difference, not the file path
-                if line.startswith('+ ') or line.startswith('- '):
-                    print(line)
-
-    else:
-        print(f'Hardening advice file not found.')
-
-# Function to configure syslog for event logging and monitoring
-def configure_syslog():
-    print("Placeholder for configure_syslog function")
-
-# Function to configure event logging
-def configure_event_logging():
-    print("Placeholder for configure_event_logging function")
 
 # Function to display menu and execute selected option
 def display_menu():
@@ -249,10 +189,14 @@ def display_menu():
         elif choice == '3':
             compare_with_startup_config()
         elif choice == '4':
-            compare_with_local_offline_version()
+            # Add the Telnet and SSH options
+            run_telnet()
+            run_ssh()
         elif choice == '5':
+            compare_with_startup_config()
             compare_with_hardening_advice()
         elif choice == '6':
+            # Add the Telnet and SSH options
             configure_syslog()
             configure_event_logging()
         elif choice == '7':
