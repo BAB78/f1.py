@@ -15,8 +15,8 @@ def apply_hardening(ip, username, password, enable_password):
         # Configuration commands for hardening
         commands = [
             "conf t",
-            "ip access-list standard SSH-ACL",
-            "permit 192.168.56.30",  # Replace <your_admin_IP> with your actual IP
+            f"ip access-list standard SSH-ACL",
+            f"permit 192.168.56.30",  # Allow the system IP
             "exit",
             "line vty 0 15",
             "access-class SSH-ACL in",
