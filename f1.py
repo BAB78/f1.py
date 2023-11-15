@@ -1,47 +1,70 @@
-# ... (other functions and code remain unchanged)
+import paramiko
+import time  # Import the 'time' module
 
-def apply_hardening(ip, username, password, enable_password):
+# Rest of your code...
+
+# Function to configure syslog
+def configure_syslog(ip, username, password, enable_password, syslog_server_ip):
     try:
         ssh = paramiko.SSHClient()
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         ssh.connect(ip, username=username, password=password)
 
-        # Enter enable mode
         ssh_shell = ssh.invoke_shell()
         ssh_shell.send("enable\n")
         ssh_shell.send(enable_password + "\n")
-        # Ensure time to receive data
-        time.sleep(1)
+        time.sleep(1)  # Ensure time to receive data
         output = ssh_shell.recv(65535).decode('utf-8')
 
-        # Configuration commands for hardening
         commands = [
             "conf t",
-            f"ip access-list standard SSH-ACL",
-            f"permit 192.168.56.30",  # Allow the system IP
-            "exit",
-            "line vty 0 15",
-            "access-class SSH-ACL in",
-            "transport input ssh",
-            # Other hardening commands as needed
+            f"logging {syslog_server_ip}",  # Replace with the actual syslog server IP
+            # Other syslog configuration commands as needed
             "end",
-            "write memory"  # Save configuration
+            "write memory"
         ]
 
         for command in commands:
             ssh_shell.send(command + "\n")
-            time.sleep(1)
-            # Receive output after each command (optional)
-            output = ssh_shell.recv(65535).decode('utf-8')
+            time.sleep(1)  # Delay to receive output
+            output = ssh_shell.recv(65535).decode('utf-8')  # Receive output
 
         ssh.close()
-        print("Hardening configuration applied successfully.")
+        print("Syslog configuration completed successfully.")
     except Exception as e:
-        print(f"Failed to apply hardening: {e}")
+        print(f"Failed to configure syslog: {e}")
 
-# Placeholder function for comparing running config with hardening advice
-def compare_with_hardening_advice():
-    print("Comparing the current running configuration against Cisco device hardening advice")
-    # Add code to compare the running configuration against Cisco hardening advice here
+# Function to configure event logging
+def configure_event_logging(ip, username, password, enable_password):
+    try:
+        ssh = paramiko.SSHClient()
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        ssh.connect(ip, username=username, password=password)
 
-# ... (remaining functions and code remain unchanged)
+        ssh_shell = ssh.invoke_shell()
+        ssh_shell.send("enable\n")
+        ssh_shell.send(enable_password + "\n")
+        time.sleep(1)  # Ensure time to receive data
+        output = ssh_shell.recv(65535).decode('utf-8')
+
+        commands = [
+            "conf t",
+            "logging buffered informational",  # Example command to set buffered logging to informational level
+            # Other event logging configuration commands as needed
+            "end",
+            "write memory"
+        ]
+
+        for command in commands:
+            ssh_shell.send(command + "\n")
+            time.sleep(1)  # Delay to receive output
+            output = ssh_shell.recv(65535).decode('utf-8')  # Receive output
+
+        ssh.close()
+        print("Event logging configuration completed successfully.")
+    except Exception as e:
+        print(f"Failed to configure event logging: {e}")
+
+# To call the functions:
+configure_syslog('192.168.56.101', 'cisco', 'cisco123!', 'class123!', '<your_syslog_server_ip>')
+configure_event_logging('192.168.56.101', 'cisco', 'cisco123!', 'class123!')
