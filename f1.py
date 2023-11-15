@@ -1,9 +1,6 @@
-# ... (previous code remains unchanged)
+import paramiko
 
-def compare_with_hardening_advice():
-    # Placeholder text for demonstration
-    print("Comparing current configuration against Cisco device hardening advice...")
-    # Your logic to compare configurations against hardening advice goes here
+# ... (previous code remains unchanged)
 
 def configure_syslog(ip, username, password, enable_password):
     try:
@@ -15,6 +12,7 @@ def configure_syslog(ip, username, password, enable_password):
         ssh_shell = ssh.invoke_shell()
         ssh_shell.send("enable\n")
         ssh_shell.send(enable_password + "\n")
+        output = ssh_shell.recv(65535).decode('utf-8')
 
         # Configuration commands to set syslog server IP and other settings
         commands = [
@@ -27,6 +25,7 @@ def configure_syslog(ip, username, password, enable_password):
 
         for command in commands:
             ssh_shell.send(command + "\n")
+            output = ssh_shell.recv(65535).decode('utf-8')
 
         ssh.close()
         print("Syslog configuration completed successfully.")
@@ -43,6 +42,7 @@ def configure_event_logging(ip, username, password, enable_password):
         ssh_shell = ssh.invoke_shell()
         ssh_shell.send("enable\n")
         ssh_shell.send(enable_password + "\n")
+        output = ssh_shell.recv(65535).decode('utf-8')
 
         # Configuration commands to enable event logging
         commands = [
@@ -55,6 +55,7 @@ def configure_event_logging(ip, username, password, enable_password):
 
         for command in commands:
             ssh_shell.send(command + "\n")
+            output = ssh_shell.recv(65535).decode('utf-8')
 
         ssh.close()
         print("Event logging configuration completed successfully.")
