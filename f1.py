@@ -31,6 +31,7 @@ running_config = fetch_config()
 if running_config:
     with open('running_config.txt', 'w') as file:
         file.write(running_config)
+    print("Running config saved to 'running_config.txt'.")
 
 # Load stored offline config
 try:
@@ -40,9 +41,13 @@ try:
     # Compare running with stored offline config
     if stored_offline_config:
         diff = difflib.unified_diff(running_config.splitlines(), stored_offline_config.splitlines())
+        differences_found = False
         print("Differences between running config and stored offline config:")
         for line in diff:
+            differences_found = True
             print(line)
+        if not differences_found:
+            print("No differences found between running config and stored offline config.")
     else:
         print("Stored offline config not found.")
 except FileNotFoundError:
@@ -50,16 +55,19 @@ except FileNotFoundError:
 
 # Function to compare running config against hardening advice
 def compare_with_hardening_advice():
-    # Load hardening advice from a file or Moodle page
     try:
         with open('hardening_advice.txt', 'r') as file:
             hardening_advice = file.read()
 
         if hardening_advice:
             diff = difflib.unified_diff(running_config.splitlines(), hardening_advice.splitlines())
+            differences_found = False
             print("Differences between running config and hardening advice:")
             for line in diff:
+                differences_found = True
                 print(line)
+            if not differences_found:
+                print("No differences found between running config and hardening advice.")
         else:
             print("Hardening advice not found.")
     except FileNotFoundError:
@@ -83,7 +91,7 @@ def configure_syslog():
         ssh_shell.send('write memory\n')
         ssh_client.close()
 
-        print("Syslog configuration completed successfully.")
+        print(f"Syslog configuration for {syslog_server_ip} completed successfully.")
     except Exception as e:
         print(f"Failed to configure syslog: {e}")
 
