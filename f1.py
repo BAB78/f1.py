@@ -5,6 +5,7 @@ import time
 router_ip = '192.168.56.30'
 router_username = 'cisco'
 router_password = 'cisco123!'
+syslog_server_ip = '192.168.56.101'  # Replace with the syslog server IP
 
 # Function to fetch router configuration via SSH
 def fetch_config():
@@ -25,48 +26,44 @@ def fetch_config():
         print(f"Failed to fetch configuration: {e}")
         return None
 
-# Fetch running config
+# Fetch running and startup configs
 running_config = fetch_config()
 if running_config:
     with open('running_config.txt', 'w') as file:
         file.write(running_config)
 
-    # Save the fetched config as the offline config
-    with open('stored_offline_config.txt', 'w') as file:
-        file.write(running_config)
-else:
-    print("Failed to fetch configuration.")
-
-# Load stored offline config for comparison
+# Load stored offline config
 try:
     with open('stored_offline_config.txt', 'r') as file:
         stored_offline_config = file.read()
 
     # Compare running with stored offline config
-    if running_config and stored_offline_config:
+    if stored_offline_config:
         diff = difflib.unified_diff(running_config.splitlines(), stored_offline_config.splitlines())
         print("Differences between running config and stored offline config:")
         for line in diff:
             print(line)
     else:
-        print("Failed to compare configurations.")
-
+        print("Stored offline config not found.")
 except FileNotFoundError:
-    print("Stored offline configuration not found.")
+    print("Stored offline config file not found.")
 
 # Function to compare running config against hardening advice
 def compare_with_hardening_advice():
     # Load hardening advice from a file or Moodle page
-    with open('hardening_advice.txt', 'r') as file:
-        hardening_advice = file.read()
+    try:
+        with open('hardening_advice.txt', 'r') as file:
+            hardening_advice = file.read()
 
-    if running_config and hardening_advice:
-        diff = difflib.unified_diff(running_config.splitlines(), hardening_advice.splitlines())
-        print("Differences between running config and hardening advice:")
-        for line in diff:
-            print(line)
-    else:
-        print("Failed to compare with hardening advice.")
+        if hardening_advice:
+            diff = difflib.unified_diff(running_config.splitlines(), hardening_advice.splitlines())
+            print("Differences between running config and hardening advice:")
+            for line in diff:
+                print(line)
+        else:
+            print("Hardening advice not found.")
+    except FileNotFoundError:
+        print("Hardening advice file not found.")
 
 # Function to configure syslog on the router
 def configure_syslog():
@@ -80,7 +77,7 @@ def configure_syslog():
         ssh_shell.send('cisco123!\n')
         time.sleep(1)
         ssh_shell.send('conf t\n')
-        ssh_shell.send('logging <syslog_server_ip>\n')  # Replace with actual syslog server IP
+        ssh_shell.send(f'logging {syslog_server_ip}\n')  # Replace with actual syslog server IP
         time.sleep(1)
         ssh_shell.send('end\n')
         ssh_shell.send('write memory\n')
