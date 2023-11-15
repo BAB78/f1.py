@@ -1,70 +1,87 @@
 import paramiko
-import time  # Import the 'time' module
+import difflib
+import time
 
-# Rest of your code...
+router_ip = '192.168.56.30'
+router_username = 'cisco'
+router_password = 'cisco123!'
 
-# Function to configure syslog
-def configure_syslog(ip, username, password, enable_password, syslog_server_ip):
+# Function to fetch router configuration via SSH
+def fetch_config():
     try:
-        ssh = paramiko.SSHClient()
-        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        ssh.connect(ip, username=username, password=password)
+        ssh_client = paramiko.SSHClient()
+        ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        ssh_client.connect(router_ip, username=router_username, password=router_password)
 
-        ssh_shell = ssh.invoke_shell()
-        ssh_shell.send("enable\n")
-        ssh_shell.send(enable_password + "\n")
-        time.sleep(1)  # Ensure time to receive data
-        output = ssh_shell.recv(65535).decode('utf-8')
+        ssh_shell = ssh_client.invoke_shell()
+        ssh_shell.send('terminal length 0\n')
+        ssh_shell.send('show running-config\n')
+        time.sleep(2)
+        running_config = ssh_shell.recv(65535).decode('utf-8')
 
-        commands = [
-            "conf t",
-            f"logging {syslog_server_ip}",  # Replace with the actual syslog server IP
-            # Other syslog configuration commands as needed
-            "end",
-            "write memory"
-        ]
+        ssh_client.close()
+        return running_config
+    except Exception as e:
+        print(f"Failed to fetch configuration: {e}")
+        return None
 
-        for command in commands:
-            ssh_shell.send(command + "\n")
-            time.sleep(1)  # Delay to receive output
-            output = ssh_shell.recv(65535).decode('utf-8')  # Receive output
+# Fetch running and startup configs
+running_config = fetch_config()
+if running_config:
+    with open('running_config.txt', 'w') as file:
+        file.write(running_config)
 
-        ssh.close()
+# Load stored offline config
+with open('stored_offline_config.txt', 'r') as file:
+    stored_offline_config = file.read()
+
+# Compare running with stored offline config
+if running_config and stored_offline_config:
+    diff = difflib.unified_diff(running_config.splitlines(), stored_offline_config.splitlines())
+    print("Differences between running config and stored offline config:")
+    for line in diff:
+        print(line)
+else:
+    print("Failed to compare configurations.")
+
+# Function to compare running config against hardening advice
+def compare_with_hardening_advice():
+    # Load hardening advice from a file or Moodle page
+    with open('hardening_advice.txt', 'r') as file:
+        hardening_advice = file.read()
+
+    if running_config and hardening_advice:
+        diff = difflib.unified_diff(running_config.splitlines(), hardening_advice.splitlines())
+        print("Differences between running config and hardening advice:")
+        for line in diff:
+            print(line)
+    else:
+        print("Failed to compare with hardening advice.")
+
+# Function to configure syslog on the router
+def configure_syslog():
+    try:
+        ssh_client = paramiko.SSHClient()
+        ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        ssh_client.connect(router_ip, username=router_username, password=router_password)
+
+        ssh_shell = ssh_client.invoke_shell()
+        ssh_shell.send('enable\n')
+        ssh_shell.send('cisco123!\n')
+        time.sleep(1)
+        ssh_shell.send('conf t\n')
+        ssh_shell.send('logging <syslog_server_ip>\n')  # Replace with actual syslog server IP
+        time.sleep(1)
+        ssh_shell.send('end\n')
+        ssh_shell.send('write memory\n')
+        ssh_client.close()
+
         print("Syslog configuration completed successfully.")
     except Exception as e:
         print(f"Failed to configure syslog: {e}")
 
-# Function to configure event logging
-def configure_event_logging(ip, username, password, enable_password):
-    try:
-        ssh = paramiko.SSHClient()
-        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        ssh.connect(ip, username=username, password=password)
+# Compare running config against hardening advice
+compare_with_hardening_advice()
 
-        ssh_shell = ssh.invoke_shell()
-        ssh_shell.send("enable\n")
-        ssh_shell.send(enable_password + "\n")
-        time.sleep(1)  # Ensure time to receive data
-        output = ssh_shell.recv(65535).decode('utf-8')
-
-        commands = [
-            "conf t",
-            "logging buffered informational",  # Example command to set buffered logging to informational level
-            # Other event logging configuration commands as needed
-            "end",
-            "write memory"
-        ]
-
-        for command in commands:
-            ssh_shell.send(command + "\n")
-            time.sleep(1)  # Delay to receive output
-            output = ssh_shell.recv(65535).decode('utf-8')  # Receive output
-
-        ssh.close()
-        print("Event logging configuration completed successfully.")
-    except Exception as e:
-        print(f"Failed to configure event logging: {e}")
-
-# To call the functions:
-configure_syslog('192.168.56.101', 'cisco', 'cisco123!', 'class123!', '<your_syslog_server_ip>')
-configure_event_logging('192.168.56.101', 'cisco', 'cisco123!', 'class123!')
+# Configure syslog on the router
+configure_syslog()
