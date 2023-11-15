@@ -1,3 +1,12 @@
+error message
+Failed to fetch configuration: [Errno None] Unable to connect to port 22 on 192.168.56.30
+Traceback (most recent call last):
+  File "task2.py", line 35, in <module>
+    with open('stored_offline_config.txt', 'r') as file:
+FileNotFoundError: [Errno 2] No such file or directory: 'stored_offline_config.txt'
+
+
+
 import paramiko
 import difflib
 import time
