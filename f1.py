@@ -1,12 +1,3 @@
-error message
-Failed to fetch configuration: [Errno None] Unable to connect to port 22 on 192.168.56.30
-Traceback (most recent call last):
-  File "task2.py", line 35, in <module>
-    with open('stored_offline_config.txt', 'r') as file:
-FileNotFoundError: [Errno 2] No such file or directory: 'stored_offline_config.txt'
-
-
-
 import paramiko
 import difflib
 import time
@@ -34,24 +25,34 @@ def fetch_config():
         print(f"Failed to fetch configuration: {e}")
         return None
 
-# Fetch running and startup configs
+# Fetch running config
 running_config = fetch_config()
 if running_config:
     with open('running_config.txt', 'w') as file:
         file.write(running_config)
 
-# Load stored offline config
-with open('stored_offline_config.txt', 'r') as file:
-    stored_offline_config = file.read()
-
-# Compare running with stored offline config
-if running_config and stored_offline_config:
-    diff = difflib.unified_diff(running_config.splitlines(), stored_offline_config.splitlines())
-    print("Differences between running config and stored offline config:")
-    for line in diff:
-        print(line)
+    # Save the fetched config as the offline config
+    with open('stored_offline_config.txt', 'w') as file:
+        file.write(running_config)
 else:
-    print("Failed to compare configurations.")
+    print("Failed to fetch configuration.")
+
+# Load stored offline config for comparison
+try:
+    with open('stored_offline_config.txt', 'r') as file:
+        stored_offline_config = file.read()
+
+    # Compare running with stored offline config
+    if running_config and stored_offline_config:
+        diff = difflib.unified_diff(running_config.splitlines(), stored_offline_config.splitlines())
+        print("Differences between running config and stored offline config:")
+        for line in diff:
+            print(line)
+    else:
+        print("Failed to compare configurations.")
+
+except FileNotFoundError:
+    print("Stored offline configuration not found.")
 
 # Function to compare running config against hardening advice
 def compare_with_hardening_advice():
