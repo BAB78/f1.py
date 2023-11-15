@@ -1,16 +1,15 @@
-# ... (previous code)
-
-def apply_hardening(ip, username, password, enable_password):
-    try:
-        # Existing hardening configuration code
-        # ...
-
-        print("Hardening configuration applied successfully.")
-    except Exception as e:
-        print(f"Failed to apply hardening: {e}")
-
 def configure_syslog(ip, username, password, enable_password):
     try:
+        ssh = paramiko.SSHClient()
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        ssh.connect(ip, username=username, password=password)
+
+        # Enter enable mode
+        ssh_shell = ssh.invoke_shell()
+        ssh_shell.send("enable\n")
+        ssh_shell.send(enable_password + "\n")
+        output = ssh_shell.recv(65535).decode('utf-8')
+
         # Configuration commands for syslog
         commands = [
             "conf t",
@@ -19,13 +18,28 @@ def configure_syslog(ip, username, password, enable_password):
             "end",
             "write memory"  # Save configuration
         ]
-        # ... (SSH connection and execution of commands)
+
+        for command in commands:
+            ssh_shell.send(command + "\n")
+            output = ssh_shell.recv(65535).decode('utf-8')
+
+        ssh.close()
         print("Syslog configuration completed successfully.")
     except Exception as e:
         print(f"Failed to configure syslog: {e}")
 
 def configure_event_logging(ip, username, password, enable_password):
     try:
+        ssh = paramiko.SSHClient()
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        ssh.connect(ip, username=username, password=password)
+
+        # Enter enable mode
+        ssh_shell = ssh.invoke_shell()
+        ssh_shell.send("enable\n")
+        ssh_shell.send(enable_password + "\n")
+        output = ssh_shell.recv(65535).decode('utf-8')
+
         # Configuration commands for event logging
         commands = [
             "conf t",
@@ -34,26 +48,12 @@ def configure_event_logging(ip, username, password, enable_password):
             "end",
             "write memory"  # Save configuration
         ]
-        # ... (SSH connection and execution of commands)
+
+        for command in commands:
+            ssh_shell.send(command + "\n")
+            output = ssh_shell.recv(65535).decode('utf-8')
+
+        ssh.close()
         print("Event logging configuration completed successfully.")
     except Exception as e:
         print(f"Failed to configure event logging: {e}")
-
-# ... (remaining code)
-
-def display_menu():
-    while True:
-        # ... (previous code)
-
-        elif choice == '5':
-            apply_hardening(ip_address, username, password, enable_password)
-        elif choice == '6':
-            configure_syslog(ip_address, username, password, enable_password)
-            configure_event_logging(ip_address, username, password, enable_password)
-        elif choice == '7':
-            break
-        else:
-            print('Invalid choice. Please enter a number between 1 and 7.')
-
-# Main execution
-display_menu()
