@@ -1,60 +1,64 @@
-from netmiko import ConnectHandler
-import difflib
+# ... (previous code remains unchanged)
 
-# Define the router details
-router = {
-    'device_type': 'cisco_ios',
-    'ip': '192.168.56.101',
-    'username': 'cisco',
-    'password': 'cisco123!',
-    'secret': 'your_enable_password',  # Replace with your actual enable password
-}
+def compare_with_hardening_advice():
+    # Placeholder text for demonstration
+    print("Comparing current configuration against Cisco device hardening advice...")
+    # Your logic to compare configurations against hardening advice goes here
 
-# Connect to the router
-net_connect = ConnectHandler(**router)
-net_connect.enable()
+def configure_syslog(ip, username, password, enable_password):
+    try:
+        ssh = paramiko.SSHClient()
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        ssh.connect(ip, username=username, password=password)
 
-# Function to fetch running configuration
-def get_running_config():
-    running_config = net_connect.send_command("show running-config")
-    return running_config
+        # Enter enable mode
+        ssh_shell = ssh.invoke_shell()
+        ssh_shell.send("enable\n")
+        ssh_shell.send(enable_password + "\n")
 
-# Function to fetch startup configuration
-def get_startup_config():
-    startup_config = net_connect.send_command("show startup-config")
-    return startup_config
+        # Configuration commands to set syslog server IP and other settings
+        commands = [
+            "conf t",
+            "logging <syslog_server_ip>",  # Replace <syslog_server_ip> with the actual syslog server IP
+            # Other syslog configuration commands as needed
+            "end",
+            "write memory"  # Save configuration
+        ]
 
-# Function to compare configurations and display differences
-def compare_configurations(config1, config2):
-    diff = difflib.unified_diff(config1.splitlines(), config2.splitlines())
-    print('\n'.join(diff))
+        for command in commands:
+            ssh_shell.send(command + "\n")
 
-# Task 1: Compare running config with startup config
-running_config = get_running_config()
-startup_config = get_startup_config()
-print("\nTask 1: Compare running config with startup config")
-compare_configurations(running_config, startup_config)
+        ssh.close()
+        print("Syslog configuration completed successfully.")
+    except Exception as e:
+        print(f"Failed to configure syslog: {e}")
 
-# Task 2: Compare running config with local offline version
-# (Assuming you have a local file named 'offline_config.txt')
-with open('offline_config.txt', 'r') as offline_file:
-    offline_config = offline_file.read()
+def configure_event_logging(ip, username, password, enable_password):
+    try:
+        ssh = paramiko.SSHClient()
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        ssh.connect(ip, username=username, password=password)
 
-print("\nTask 2: Compare running config with local offline version")
-compare_configurations(running_config, offline_config)
+        # Enter enable mode
+        ssh_shell = ssh.invoke_shell()
+        ssh_shell.send("enable\n")
+        ssh_shell.send(enable_password + "\n")
 
-# Task 3: Placeholder for comparing with Cisco device hardening advice
-print("\nTask 3: Placeholder for comparing with Cisco device hardening advice")
+        # Configuration commands to enable event logging
+        commands = [
+            "conf t",
+            "logging buffered informational",  # Example command to set buffered logging to informational level
+            # Other event logging configuration commands as needed
+            "end",
+            "write memory"  # Save configuration
+        ]
 
-# Task 4: Configure syslog for event logging and monitoring
-syslog_commands = [
-    'logging buffered 8192 informational',
-    'logging trap informational',
-    'logging host 192.168.1.2',  # Replace with your syslog server IP
-]
+        for command in commands:
+            ssh_shell.send(command + "\n")
 
-net_connect.send_config_set(syslog_commands)
-print("\nTask 4: Syslog configuration applied")
+        ssh.close()
+        print("Event logging configuration completed successfully.")
+    except Exception as e:
+        print(f"Failed to configure event logging: {e}")
 
-# Disconnect from the router
-net_connect.disconnect()
+# ... (remaining code remains unchanged)
