@@ -10,6 +10,8 @@ def apply_hardening(ip, username, password, enable_password):
         ssh_shell = ssh.invoke_shell()
         ssh_shell.send("enable\n")
         ssh_shell.send(enable_password + "\n")
+        # Ensure time to receive data
+        time.sleep(1)
         output = ssh_shell.recv(65535).decode('utf-8')
 
         # Configuration commands for hardening
@@ -28,6 +30,8 @@ def apply_hardening(ip, username, password, enable_password):
 
         for command in commands:
             ssh_shell.send(command + "\n")
+            time.sleep(1)
+            # Receive output after each command (optional)
             output = ssh_shell.recv(65535).decode('utf-8')
 
         ssh.close()
