@@ -1,3 +1,4 @@
+
 import telnetlib
 import paramiko
 import difflib
@@ -13,8 +14,6 @@ ssh_username = 'cisco'
 ssh_password = 'cisco123!'
 output_file = 'running_config.txt'  # Name of the local file to save the running configuration
 offline_config_file = 'startup_config.txt'  # Path to save the startup configuration
-running_config_telnet = None
-running_config_ssh = None
 
 # Function to handle Telnet login and command execution
 def telnet_session(ip, user, passwd, enable_pass, command):
@@ -56,7 +55,8 @@ def ssh_session(ip, user, passwd, enable_pass, command):
         # Enter enable mode
         ssh_shell.send('enable\n')
         ssh_shell.send(enable_pass + '\n')
-    
+        time.sleep(1)
+
         print('SSH Session:')
         print(f'Successfully connected to: {ip}')
         print(f'Username: {user}')
@@ -77,9 +77,8 @@ def ssh_session(ip, user, passwd, enable_pass, command):
 
         # Exit enable mode
         ssh_shell.send('exit\n')
-
-        # Close SSH session
         ssh.close()
+
         return running_config_ssh
     except Exception as e:
         print(f'SSH Session Failed: {e}')
@@ -87,46 +86,45 @@ def ssh_session(ip, user, passwd, enable_pass, command):
 
 # Function to run Telnet and save the running configuration
 def run_telnet():
-    global running_config_telnet
     running_config_telnet = telnet_session(ip_address, username, password, enable_password, 'show running-config')
-    print('Telnet Session:')
-    print(f'Successfully connected to: {ip_address}')
-    print(f'Username: {username}')
 
-    # Save the Telnet running configuration to a local file
-    with open(output_file, 'w') as file:
-        file.write(running_config_telnet)
+    if running_config_telnet is not None:
+        print('Telnet Session:')
+        print(f'Successfully connected to: {ip_address}')
+        print(f'Username: {username}')
 
-    print('Running configuration saved to', output_file)
+        # Save the Telnet running configuration to a local file
+        with open(output_file, 'w') as file:
+            file.write(running_config_telnet)
+
+        print('Running configuration saved to', output_file)
 
 # Function to run SSH and save the running configuration
 def run_ssh():
-    global running_config_ssh
     running_config_ssh = ssh_session(ip_address, ssh_username, ssh_password, enable_password, 'show running-config')
-    print('SSH Session:')
-    print(f'Successfully connected to: {ip_address}')
-    print(f'Username: {ssh_username}')
-    print(f'Password: {ssh_password}')
-    print(f'Enable Password: {enable_password}')
 
-    # Save the SSH running configuration to a local file
-    with open(output_file, 'w') as file:
-        file.write(running_config_ssh)
+    if running_config_ssh is not None:
+        print('SSH Session:')
+        print(f'Successfully connected to: {ip_address}')
+        print(f'Username: {ssh_username}')
+        print(f'Password: {ssh_password}')
+        print(f'Enable Password: {enable_password}')
 
-    print('Running configuration saved to', output_file)
-    print('------------------------------------------------------')
+        # Save the SSH running configuration to a local file
+        with open(output_file, 'w') as file:
+            file.write(running_config_ssh)
+
+        print('Running configuration saved to', output_file)
+        print('------------------------------------------------------')
 
 # Function to compare with startup configuration
 def compare_with_startup_config():
-    global running_config_telnet, running_config_ssh
-    if running_config_telnet is None:
-        running_config_telnet = telnet_session(ip_address, username, password, enable_password, 'show running-config')
-
-    if running_config_ssh is None:
-        running_config_ssh = ssh_session(ip_address, ssh_username, ssh_password, enable_password, 'show running-config')
+    running_config_telnet = telnet_session(ip_address, username, password, enable_password, 'show running-config')
+    running_config_ssh = ssh_session(ip_address, ssh_username, ssh_password, enable_password, 'show running-config')
 
     if running_config_telnet is not None and running_config_ssh is not None:
         startup_config_file_path = os.path.join(offline_config_file)
+
         if os.path.exists(startup_config_file_path):
             with open(startup_config_file_path, 'r') as startup_file:
                 startup_config = startup_file.read()
@@ -154,19 +152,16 @@ def compare_with_startup_config():
         else:
             print(f'Startup config file not found.')
     else:
-        print('Run Telnet or SSH first to fetch running configuration.')
+        print('Run Telnet or SSH first to fetch the running configuration.')
 
 # Function to compare with local offline version
 def compare_with_local_offline_version():
-    global running_config_telnet, running_config_ssh
-    if running_config_telnet is None:
-        running_config_telnet = telnet_session(ip_address, username, password, enable_password, 'show running-config')
-
-    if running_config_ssh is None:
-        running_config_ssh = ssh_session(ip_address, ssh_username, ssh_password, enable_password, 'show running-config')
+    running_config_telnet = telnet_session(ip_address, username, password, enable_password, 'show running-config')
+    running_config_ssh = ssh_session(ip_address, ssh_username, ssh_password, enable_password, 'show running-config')
 
     if running_config_telnet is not None and running_config_ssh is not None:
         offline_config_file_path = os.path.join(offline_config_file)
+
         if os.path.exists(offline_config_file_path):
             with open(offline_config_file_path, 'r') as offline_file:
                 offline_config = offline_file.read()
@@ -194,7 +189,7 @@ def compare_with_local_offline_version():
         else:
             print(f'Offline config file not found.')
     else:
-        print('Run Telnet or SSH first to fetch running configuration.')
+        print('Run Telnet or SSH first to fetch the running configuration.')
 
 # Function to compare running config against hardening advice
 def compare_with_hardening_advice():
@@ -219,7 +214,7 @@ def compare_with_hardening_advice():
     except FileNotFoundError:
         print("Hardening advice file not found.")
 
-# Configure syslog on the router
+# Function to configure syslog on the router
 def configure_syslog(ip, username, password, enable_password):
     try:
         ssh_client = establish_connection(ip, username, password)
@@ -228,9 +223,7 @@ def configure_syslog(ip, username, password, enable_password):
             ssh_shell.send('enable\n')
             ssh_shell.send(enable_password + '\n')
             time.sleep(1)
-            ssh_shell.send('conf t\n')
-            ssh_shell.send('logging <syslog_server_ip>\n')  # Replace with actual syslog server IP
-            time.sleep(1)
+            ssh_shell.send(f"logging {syslog_server_ip}")
             ssh_shell.send('end\n')
             ssh_shell.send('write memory\n')
             ssh_client.close()
@@ -240,42 +233,6 @@ def configure_syslog(ip, username, password, enable_password):
             print("Failed to establish SSH connection for syslog configuration.")
     except Exception as e:
         print(f"Failed to configure syslog: {e}")
-
-# Compare running config against hardening advice
-compare_with_hardening_advice()
-
-# Configure syslog on the router
-configure_syslog(ip_address, username, password, enable_password)
-
-
-# Function to configure event logging
-def configure_syslog():
-    try:
-        ssh_client = establish_connection()
-        if ssh_client:
-            ssh_shell = ssh_client.invoke_shell()
-            ssh_shell.send('enable\n')
-            ssh_shell.send('cisco123!\n')
-            time.sleep(1)
-            ssh_shell.send('conf t\n')
-            ssh_shell.send('logging <syslog_server_ip>\n')  # Replace with actual syslog server IP
-            time.sleep(1)
-            ssh_shell.send('end\n')
-            ssh_shell.send('write memory\n')
-            ssh_client.close()
-
-            print("Syslog configuration completed successfully.")
-        else:
-            print("Failed to establish SSH connection for syslog configuration.")
-    except Exception as e:
-        print(f"Failed to configure syslog: {e}")
-
-
-# Compare running config against hardening advice
-compare_with_hardening_advice()
-
-# Configure syslog on the router
-configure_syslog()
 
 # Function to display menu and execute selected option
 def display_menu():
@@ -302,8 +259,8 @@ def display_menu():
         elif choice == '5':
             compare_with_hardening_advice()
         elif choice == '6':
-            configure_syslog(ip_address, username, password, enable_password)
-            configure_syslog(ip_address, username, password, enable_password)
+            syslog_server_ip = input("Enter the IP of the syslog server: ")
+            configure_syslog(ip_address, username, password, enable_password, syslog_server_ip)
         elif choice == '7':
             break
         else:
@@ -311,3 +268,4 @@ def display_menu():
 
 # Main execution
 display_menu()
+
