@@ -1,4 +1,6 @@
+Thank you for sharing the complete script. I can see that options 5 and 6 are indeed not implemented and there are some unused variables or commented out sections. Here's an updated version of the script that includes options 5 and 6:
 
+```python
 import telnetlib
 import paramiko
 import difflib
@@ -14,6 +16,7 @@ ssh_username = 'cisco'
 ssh_password = 'cisco123!'
 output_file = 'running_config.txt'  # Name of the local file to save the running configuration
 offline_config_file = 'startup_config.txt'  # Path to save the startup configuration
+hardening_advice_file = 'hardening_advice.txt'  # Path to the hardening advice file
 
 # Function to handle Telnet login and command execution
 def telnet_session(ip, user, passwd, enable_pass, command):
@@ -194,43 +197,61 @@ def compare_with_local_offline_version():
 # Function to compare running config against hardening advice
 def compare_with_hardening_advice():
     try:
-        # Fetch running configuration
-        running_config = fetch_config()
-
-        with open('hardening_advice.txt', 'r') as file:
+        with open(hardening_advice_file, 'r') as file:
             hardening_advice = file.read()
 
-        if running_config and hardening_advice:
-            diff = difflib.unified_diff(running_config.splitlines(), hardening_advice.splitlines())
-            differences_found = False
-            print("Differences between running config and hardening advice:")
-            for line in diff:
-                differences_found = True
-                print(line)
-            if not differences_found:
-                print("No differences found between running config and hardening advice.")
+        running_config_telnet = telnet_session(ip_address, username, password, enable_password, 'show running-config')
+        running_config_ssh = ssh_session(ip_address, ssh_username, ssh_password, enable_password, 'show running-config')
+
+        if running_config_telnet is not None and running_config_ssh is not None and hardening_advice:
+            # Compare the running configuration with the hardening advice for Telnet
+            diff_telnet = list(difflib.unified_diff(running_config_telnet.splitlines(), hardening_advice.splitlines()))
+
+            print('------------------------------------------------------')
+            print('Comparison with Hardening Advice (Telnet):')
+            for line in diff_telnet:
+                # Print only the difference, not the file path
+                if line.startswith('+ ') or line.startswith('- '):
+                    print(line)
+
+            # Compare the running configuration with the hardening advice for SSH
+            diff_ssh = list(difflib.unified_diff(running_config_ssh.splitlines(), hardening_advice.splitlines()))
+
+            print('------------------------------------------------------')
+            print('Comparison with Hardening Advice (SSH):')
+            for line in diff_ssh:
+                # Print only the difference, not the file path
+                if line.startswith('+ ') or line.startswith('- '):
+                    print(line)
+
         else:
             print("Failed to compare with hardening advice.")
     except FileNotFoundError:
         print("Hardening advice file not found.")
 
 # Function to configure syslog on the router
-def configure_syslog(ip, username, password, enable_password):
+def configure_syslog(ip, username, password, enable_password, syslog_server_ip):
     try:
-        ssh_client = establish_connection(ip, username, password)
-        if ssh_client:
-            ssh_shell = ssh_client.invoke_shell()
-            ssh_shell.send('enable\n')
-            ssh_shell.send(enable_password + '\n')
-            time.sleep(1)
-            ssh_shell.send(f"logging {syslog_server_ip}")
-            ssh_shell.send('end\n')
-            ssh_shell.send('write memory\n')
-            ssh_client.close()
+        ssh = paramiko.SSHClient()
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        ssh.connect(ip, username=username, password=password, look_for_keys=False, allow_agent=False)
+        ssh.invoke_shell()
+        ssh_shell = ssh.invoke_shell()
 
-            print("Syslog configuration completed successfully.")
-        else:
-            print("Failed to establish SSH connection for syslog configuration.")
+        # Enter enable mode
+        ssh_shell.send('enable\n')
+        ssh_shell.send(enable_password + '\n')
+
+        # Configure syslog server and save configuration
+        ssh_shell.send(f'logging host {syslog_server_ip}\n')
+        ssh_shell.send('end\n')
+        ssh_shell.send('wr mem\n')
+        time.sleep(1)
+
+        # Close SSH session
+        ssh.close()
+
+        print("Syslog configuration completed successfully.")
     except Exception as e:
         print(f"Failed to configure syslog: {e}")
 
@@ -268,4 +289,6 @@ def display_menu():
 
 # Main execution
 display_menu()
+``` 
 
+I hope this helps. Let me know if you have any further questions!
