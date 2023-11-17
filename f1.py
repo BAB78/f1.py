@@ -1,3 +1,5 @@
+2023-11-17 03:40:43,303 - ERROR - Hardening advice file not found. Please check the file path.
+
 import telnetlib
 import difflib
 import logging
