@@ -100,13 +100,11 @@ display_menu()
 
 
 
-
-Apologies for the mistake. Here's the corrected code:
+Apologies for the inconvenience. Let's modify the code to handle the "Hardening advice file not found" error correctly:
 
 ```python
 import telnetlib
 import difflib
-import os
 
 # Define common variables
 router_ip_address = '192.168.56.101'
@@ -147,11 +145,6 @@ def telnet_session(ip, username, password, enable_password, commands):
 # Function to compare running configuration with hardening advice
 def compare_running_config_with_hardening_advice():
     try:
-        # Check if hardening advice file exists
-        if not os.path.exists(hardening_advice_file_path):
-            print(f"Hardening advice file not found: {hardening_advice_file_path}")
-            return
-
         # Read hardening advice from file
         with open(hardening_advice_file_path, 'r', encoding='utf-8') as f:
             hardening_advice = f.read()
@@ -172,9 +165,13 @@ def compare_running_config_with_hardening_advice():
                 print("No significant differences found with hardening advice.")
         else:
             print("Failed to retrieve the running configuration.")
-
+    except FileNotFoundError:
+        print("Hardening advice file not found. Please check the file path.")
     except Exception as e:
         print(f'Error comparing configurations: {e}')
+
+# Main execution
+compare_running_config_with_hardening_advice()
 ```
 
-Now the `compare_running_config_with_hardening_advice()` function correctly checks whether the hardening advice file exists and provides an appropriate error message.
+Ensure that the `hardening_advice.txt` file is in the same directory as the script. Running the script will now handle the "Hardening advice file not found" error appropriately. If the issue persists, please provide more details about the error you're experiencing.ecks whether the hardening advice file exists and provides an appropriate error message.
