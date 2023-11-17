@@ -1,6 +1,9 @@
 def compare_with_hardening_advice():
     try:
-        with open('configs/hardening_advice.txt', 'r') as f:
+        script_dir = os.path.dirname(os.path.abspath(__file__))  # Get the script's directory
+        hardening_advice_path = os.path.join(script_dir, 'configs', 'hardening_advice.txt')
+
+        with open(hardening_advice_path, 'r') as f:
             hardening_advice = f.read()
 
         running_config = telnet_session(ip_address, username, password, enable_password, 'show running-config')
@@ -19,10 +22,6 @@ def compare_with_hardening_advice():
 
     except FileNotFoundError:
         logging.error("Hardening advice file not found. Please check the file path.")
-import telnetlib
-import difflib
-import logging
-
 
 
 # Define logger for error handling
