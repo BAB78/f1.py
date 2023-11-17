@@ -75,3 +75,20 @@ def configure_syslog():
 def display_menu():
     while True:
         print('\nMenu:')
+        print('1. Compare the current running configuration against Cisco device hardening advice')
+        print('2. Configure syslog for event logging and monitoring')
+        print('3. Exit')
+
+        choice = input('Enter your choice (1-3): ')
+
+        if choice == '1':
+            compare_with_hardening_advice()
+        elif choice == '2':
+            configure_syslog()
+        elif choice == '3':
+            break
+        else:
+            print('Invalid choice. Please enter a number between 1 and 3.')
+
+# Main execution
+display_menu()
