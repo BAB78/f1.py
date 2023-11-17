@@ -94,3 +94,62 @@ def display_menu():
 
 # Main execution
 display_menu()
+
+
+
+
+
+
+
+
+import paramiko
+import difflib
+
+router_ip = '192.168.56.101'
+username = 'cisco'
+password = 'cisco123!'
+
+def connect_ssh(ip, username, password):
+  ssh = paramiko.SSHClient()
+  ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+  ssh.connect(ip, username=username, password=password)
+  return ssh
+
+def get_config(ssh):
+  stdin, stdout, stderr = ssh.exec_command("show running-config")
+  return stdout.read().decode()
+
+def compare_config(running_config):
+  with open("hardening_baseline.txt") as f: 
+    baseline = f.read()
+  
+  diff = difflib.unified_diff(running_config.splitlines(), baseline.splitlines())
+  print(''.join(diff))
+
+def enable_syslog(ssh):
+  commands = [
+    "conf t",
+    "logging 192.168.1.1", # syslog server IP
+    "end",
+    "wr mem"
+  ]
+
+  for cmd in commands:
+    stdin, stdout, stderr = ssh.exec_command(cmd)
+  print("Syslog configured!")
+  
+if __name__ == "__main__":
+
+  print("Connecting to device...")
+  ssh = connect_ssh(router_ip, username, password)
+
+  print("Retrieving running config...")
+  running_config = get_config(ssh)
+
+  print("Comparing to hardening baseline...")
+  compare_config(running_config)
+
+  print("Enabling syslog...")
+  enable_syslog(ssh)
+
+  ssh.close()
