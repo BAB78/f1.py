@@ -100,31 +100,41 @@ display_menu()
 
 
 
+import paramiko
+import sys
 
-Traceback (most recent call last):
-  File "/home/devasc/labs/prne/lab.py", line 40, in <module>
-    ssh = connect_ssh(router_ip, username, password)
-  File "/home/devasc/labs/prne/lab.py", line 11, in connect_ssh
+def connect_ssh(ip, username, password):
+
+  print(f"Connecting to {ip}")
+  
+  try:
+    ssh = paramiko.SSHClient()
+    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     ssh.connect(ip, username=username, password=password)
-  File "/home/devasc/.local/lib/python3.8/site-packages/paramiko/client.py", line 435, in connect
-    self._auth(
-  File "/home/devasc/.local/lib/python3.8/site-packages/paramiko/client.py", line 764, in _auth
-    raise saved_exception
-  File "/home/devasc/.local/lib/python3.8/site-packages/paramiko/client.py", line 751, in _auth
-    self._transport.auth_password(username, password)
-  File "/home/devasc/.local/lib/python3.8/site-packages/paramiko/transport.py", line 1498, in auth_password
-    raise SSHException("No existing session")
-paramiko.ssh_exception.SSHException: No existing session
+    print("SSH connection established!")
+    return ssh
+
+  except paramiko.AuthenticationException:
+    print("Authentication failed!")
+    sys.exit(1)
+      
+  except Exception as e:
+    print(f"Error connecting via SSH: {e}")
+    sys.exit(1)
+
+# Main code  
+
+router_ip = "192.168.1.1" 
+username = "cisco"
+password = "cisco123"
+
+try:
 
   ssh = connect_ssh(router_ip, username, password)
+  
+  # Remaining script code 
 
-  print("Retrieving running config...")
-  running_config = get_config(ssh)
+finally:
 
-  print("Comparing to hardening baseline...")
-  compare_config(running_config)
-
-  print("Enabling syslog...")
-  enable_syslog(ssh)
-
-  ssh.close()
+  if ssh:
+    ssh.close()
