@@ -1,32 +1,9 @@
-# Function to display menu and execute selected option
-def display_menu():
-    while True:
-        print('\nMenu:')
-        print('1. Compare the current running configuration against Cisco device hardening advice')
-        print('2. Configure syslog for event logging and monitoring')
-        print('3. Exit')
-
-        choice = input('Enter your choice (1-3): ')
-
-        if choice == '1':
-            compare_with_hardening_advice()
-        elif choice == '2':
-            configure_syslog()
-        elif choice == '3':
-            break
-        else:
-            print('Invalid choice. Please enter a number between 1 and 3.')
-
-
-
-
-
-
-
-
-
 import telnetlib
 import difflib
+import logging
+
+# Define logger for error handling
+logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO)
 
 # Define common variables
 ip_address = '192.168.56.101'
@@ -53,7 +30,7 @@ def telnet_session(ip, user, passwd, enable_pass, command):
 
         # Send a command to output the running configuration
         tn.write(command.encode('utf-8') + b'\n')
-        
+
         # Read until you find the end pattern or timeout
         running_config_telnet = tn.read_until(b'end\r\n\r\n', timeout=30).decode('utf-8')
 
@@ -63,10 +40,10 @@ def telnet_session(ip, user, passwd, enable_pass, command):
 
         return running_config_telnet
     except Exception as e:
-        print(f'Telnet Session Failed: {e}')
+        logging.error(f'Telnet Session Failed: {e}')
         return None
 
-# Function to compare with hardening advice 
+# Function to compare with hardening advice
 def compare_with_hardening_advice():
     try:
         with open('configs/hardening_advice.txt', 'r') as f:
@@ -75,39 +52,26 @@ def compare_with_hardening_advice():
         running_config = telnet_session(ip_address, username, password, enable_password, 'show running-config')
 
         if running_config:
-            diff = difflib.unified_diff(running_config.splitlines(), hardening_advice.splitlines())
-            diff_result = '\n'.join(diff)
-            if len(diff_result) > 0:
-                print(diff_result)
+            diff_result = list(difflib.unified_diff(running_config.splitlines(), hardening_advice.splitlines()))
+
+            if diff_result:
+                logging.info('Differences found with hardening advice:')
+                for line in diff_result:
+                    print(line)
             else:
-                print("No differences found with hardening advice.")
+                logging.info("No significant differences found with hardening advice.")
         else:
-            print("Failed to retrieve the running configuration.")
+            logging.error("Failed to retrieve the running configuration.")
+
     except FileNotFoundError:
-        print("Hardening advice file not found. Please check the file path.")
+        logging.error("Hardening advice file not found. Please check the file path.")
 
 # Function to configure syslog
 def configure_syslog():
-    # Your syslog configuration logic here
+    logging.info('Configuring syslog...')
+    # Implement syslog configuration logic here
 
 # Function to display menu and execute selected option
 def display_menu():
     while True:
         print('\nMenu:')
-        print('1. Compare the current running configuration against Cisco device hardening advice')
-        print('2. Configure syslog for event logging and monitoring')
-        print('3. Exit')
-
-        choice = input('Enter your choice (1-3): ')
-
-        if choice == '1':
-            compare_with_hardening_advice()
-        elif choice == '2':
-            configure_syslog()
-        elif choice == '3':
-            break
-        else:
-            print('Invalid choice. Please enter a number between 1 and 3.')
-
-# Main execution
-display_menu()
