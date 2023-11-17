@@ -101,6 +101,9 @@ display_menu()
 
 
 
+Apologies for the mistake. Here's the corrected code:
+
+```python
 import telnetlib
 import difflib
 import os
@@ -172,3 +175,6 @@ def compare_running_config_with_hardening_advice():
 
     except Exception as e:
         print(f'Error comparing configurations: {e}')
+```
+
+Now the `compare_running_config_with_hardening_advice()` function correctly checks whether the hardening advice file exists and provides an appropriate error message.
