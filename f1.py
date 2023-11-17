@@ -99,47 +99,8 @@ display_menu()
 
 
 
-import telnetlib
-import difflib
-import os
 
-# Define common variables
-router_ip_address = '192.168.56.101'
-router_username = 'cisco'
-router_password = 'cisco123!'
-enable_password = 'class123!'
-hardening_advice_file_path = 'hardening_advice.txt'  # Path to the hardening advice file
 
-# Function to establish a Telnet session and execute commands
-def telnet_session(ip, username, password, enable_password, commands):
-    try:
-        tn = telnetlib.Telnet(ip)
-        tn.read_until(b'Username: ', timeout=10)
-        tn.write(username.encode('utf-8') + b'\n')
-        tn.read_until(b'Password: ', timeout=10)
-        tn.write(password.encode('utf-8') + b'\n')
-        tn.read_until(b'>', timeout=10)
-        tn.write(b'enable\n')
-        tn.read_until(b'Password: ', timeout=10)
-        tn.write(enable_password.encode('utf-8') + b'\n')
-
-        # Add the "terminal length 0" command to disable paging
-        tn.write(b'terminal length 0\n')
-
-        output = ''
-        for command in commands:
-            tn.write(command.encode('utf-8') + b'\n')
-            output += tn.read_until(b'#').decode('utf-8')
-
-        tn.write(b'quit\n')
-        tn.close()
-
-        return output
-    except Exception as e:
-        print(f'Telnet Session Failed: {e}')
-        return None
-
-# Function to compare running configuration with hardening advice
 def compare_running_config_with_hardening_advice():
     try:
         # Check if hardening advice file exists
@@ -170,6 +131,3 @@ def compare_running_config_with_hardening_advice():
 
     except Exception as e:
         print(f'Error comparing configurations: {e}')
-
-# Main execution
-compare_running_config_with_hardening_advice()
