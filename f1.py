@@ -110,6 +110,7 @@ router_password = 'cisco123!'
 enable_password = 'class123!'
 hardening_advice_file_path = 'hardening_advice.txt'  # Path to the hardening advice file
 
+
 # Function to establish a Telnet session and execute commands
 def telnet_session(ip, username, password, enable_password, commands):
     try:
@@ -139,66 +140,31 @@ def telnet_session(ip, username, password, enable_password, commands):
         print(f'Telnet Session Failed: {e}')
         return None
 
+
 # Function to compare running configuration with hardening advice
 def compare_running_config_with_hardening_advice():
-    try:
-        if os.path.exists(hardening_advice_file_path):
-            with open(hardening_advice_file_path, 'r') as f:
-                hardening_advice = f.read()
+    # Check if hardening advice file exists
+    if not os.path.exists(hardening_advice_file_path):
+        print(f"Hardening advice file not found: {hardening_advice_file_path}")
+        return
 
-            commands = ['show running-config']
+    # Read hardening advice from file
+    with open(hardening_advice_file_path, 'r', encoding='utf-8') as f:
+        hardening_advice = f.read()
 
-            running_config = telnet_session(router_ip_address, router_username, router_password, enable_password, commands)
+    # Retrieve the running configuration
+    commands = ['show running-config']
+    running_config = telnet_session(router_ip_address, router_username, router_password, enable_password, commands)
 
-            if running_config:
-                diff = difflib.unified_diff(running_config.splitlines(), hardening_advice.splitlines())
-                diff_result = '\n'.join(diff)
-                if len(diff_result) > 0:
-                    print(diff_result)
-                else:
-                    print("No differences found with hardening advice.")
-            else:
-                print("Failed to retrieve the running configuration.")
+    if running_config:
+        # Compare the running configuration to hardening advice
+        diff = difflib.unified_diff(running_config.splitlines(), hardening_advice.splitlines())
+        diff_result = '\n'.join(diff)
+
+        if len(diff_result) > 0:
+            print("Differences found with hardening advice:")
+            print(diff_result)
         else:
-            print("Hardening advice file not found. Please check the file path.")
-    except Exception as e:
-        print(f"Error occurred: {e}")
-
-# Function to configure syslog
-def configure_syslog():
-    try:
-        commands = [
-            'enable',
-            'configure terminal',
-            'logging buffered 10240',
-            'logging trap debugging',
-            'logging source-interface <interface_name>',  # Replace <interface_name> with the appropriate interface name
-            'logging <syslog_server_ip_address>',  # Replace <syslog_server_ip_address> with the syslog server IP address
-            'end'
-        ]
-
-        output = telnet_session(router_ip_address, router_username, router_password, enable_password, commands)
-        
-        if output:
-            print("Syslog configuration applied successfully.")
-            print("Event logging and monitoring enabled.")
-    except Exception as e:
-        print(f"Syslog configuration failed. Error: {e}")
-
-# Main execution
-while True:
-    print('\nMenu:')
-    print('1. Compare the current running configuration against Cisco device hardening advice')
-    print('2. Configure syslog for event logging and monitoring')
-    print('3. Exit')
-
-    choice = input('Enter your choice (1-3): ')
-
-    if choice == '1':
-        compare_running_config_with_hardening_advice()
-    elif choice == '2':
-        configure_syslog()
-    elif choice == '3':
-        break
+            print("No significant differences found with hardening advice.")
     else:
-        print('Invalid choice. Please enter a number between 1 and 3.')
+        print("Failed to retrieve the running configuration.")
