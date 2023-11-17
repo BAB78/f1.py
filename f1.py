@@ -101,46 +101,21 @@ display_menu()
 
 
 
+Traceback (most recent call last):
+  File "/home/devasc/labs/prne/lab.py", line 40, in <module>
+    ssh = connect_ssh(router_ip, username, password)
+  File "/home/devasc/labs/prne/lab.py", line 11, in connect_ssh
+    ssh.connect(ip, username=username, password=password)
+  File "/home/devasc/.local/lib/python3.8/site-packages/paramiko/client.py", line 435, in connect
+    self._auth(
+  File "/home/devasc/.local/lib/python3.8/site-packages/paramiko/client.py", line 764, in _auth
+    raise saved_exception
+  File "/home/devasc/.local/lib/python3.8/site-packages/paramiko/client.py", line 751, in _auth
+    self._transport.auth_password(username, password)
+  File "/home/devasc/.local/lib/python3.8/site-packages/paramiko/transport.py", line 1498, in auth_password
+    raise SSHException("No existing session")
+paramiko.ssh_exception.SSHException: No existing session
 
-import paramiko
-import difflib
-
-router_ip = '192.168.56.101'
-username = 'cisco'
-password = 'cisco123!'
-
-def connect_ssh(ip, username, password):
-  ssh = paramiko.SSHClient()
-  ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-  ssh.connect(ip, username=username, password=password)
-  return ssh
-
-def get_config(ssh):
-  stdin, stdout, stderr = ssh.exec_command("show running-config")
-  return stdout.read().decode()
-
-def compare_config(running_config):
-  with open("hardening_baseline.txt") as f: 
-    baseline = f.read()
-  
-  diff = difflib.unified_diff(running_config.splitlines(), baseline.splitlines())
-  print(''.join(diff))
-
-def enable_syslog(ssh):
-  commands = [
-    "conf t",
-    "logging 192.168.1.1", # syslog server IP
-    "end",
-    "wr mem"
-  ]
-
-  for cmd in commands:
-    stdin, stdout, stderr = ssh.exec_command(cmd)
-  print("Syslog configured!")
-  
-if __name__ == "__main__":
-
-  print("Connecting to device...")
   ssh = connect_ssh(router_ip, username, password)
 
   print("Retrieving running config...")
