@@ -1,8 +1,3 @@
-File "/home/devasc/labs/prne/task.py", line 67
-    def display_menu():
-    ^
-IndentationError: expected an indented block
-
 import telnetlib
 import difflib
 
