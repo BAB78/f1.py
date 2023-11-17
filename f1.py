@@ -178,6 +178,7 @@ def configure_syslog():
         
         if output:
             print("Syslog configuration applied successfully.")
+            print("Event logging and monitoring enabled.")
     except Exception as e:
         print(f"Syslog configuration failed. Error: {e}")
 
