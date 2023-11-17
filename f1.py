@@ -1,3 +1,17 @@
+Enter your choice (1-3): 1       
+Comparing running config with hardening advice...
+Traceback (most recent call last):
+  File "task.py", line 107, in <module>
+    display_menu()
+  File "task.py", line 98, in display_menu
+    compare_with_hardening_advice()
+  File "task.py", line 45, in compare_with_hardening_advice
+    with open('hardening_advice.txt', 'r') as f:
+FileNotFoundError: [Errno 2] No such file or directory: 'hardening_advice.txt'
+
+
+
+
 import telnetlib
 import difflib
 
