@@ -104,74 +104,80 @@ display_menu()
 
 import telnetlib
 import difflib
-import os
+import logging
+
+# Define logger for error handling
+logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO)
 
 # Define common variables
-router_ip_address = '192.168.56.101'
-router_username = 'cisco'
-router_password = 'cisco123!'
+ip_address = '192.168.56.101'
+username = 'cisco'
+password = 'cisco123!'
 enable_password = 'class123!'
-hardening_advice_file_path = 'hardening_advice.txt'  # Path to the hardening advice file
+output_file = 'running_config.txt'  # Name of the local file to save the running configuration
+offline_config_file = 'startup_config.txt'  # Path to save the startup configuration
+running_config_telnet = None
 
-
-# Function to establish a Telnet session and execute commands
-def telnet_session(ip, username, password, enable_password, commands):
+# Function to handle Telnet login and command execution
+def telnet_session(ip, user, passwd, enable_pass, command):
     try:
         tn = telnetlib.Telnet(ip)
         tn.read_until(b'Username: ', timeout=10)
-        tn.write(username.encode('utf-8') + b'\n')
+        tn.write(user.encode('utf-8') + b'\n')
         tn.read_until(b'Password: ', timeout=10)
-        tn.write(password.encode('utf-8') + b'\n')
-        tn.read_until(b'>', timeout=10)
-        tn.write(b'enable\n')
+        tn.write(passwd.encode('utf-8') + b'\n')
         tn.read_until(b'Password: ', timeout=10)
-        tn.write(enable_password.encode('utf-8') + b'\n')
+        tn.write(enable_pass.encode('utf-8') + b'\n')
 
         # Add the "terminal length 0" command to disable paging
         tn.write(b'terminal length 0\n')
 
-        output = ''
-        for command in commands:
-            tn.write(command.encode('utf-8') + b'\n')
-            output += tn.read_until(b'#').decode('utf-8')
+        # Send a command to output the running configuration
+        tn.write(command.encode('utf-8') + b'\n')
 
+        # Read until you find the end pattern or timeout
+        running_config_telnet = tn.read_until(b'end\r\n\r\n', timeout=30).decode('utf-8')
+
+        # Close Telnet session
         tn.write(b'quit\n')
         tn.close()
 
-        return output
+        return running_config_telnet
     except Exception as e:
-        print(f'Telnet Session Failed: {e}')
+        logging.error(f'Telnet Session Failed: {e}')
         return None
 
+# Function to compare with hardening advice
+def compare_with_hardening_advice():
+    try:
+        with open('configs/hardening_advice.txt', 'r') as f:
+            hardening_advice = f.read()
 
-# Function to compare running configuration with hardening advice
-def compare_running_config_with_hardening_advice():
-    # Check if hardening advice file exists
-    if not os.path.exists(hardening_advice_file_path):
-        print(f"Hardening advice file not found: {hardening_advice_file_path}")
-        return
+        running_config = telnet_session(ip_address, username, password, enable_password, 'show running-config')
 
-    # Read hardening advice from file
-    with open(hardening_advice_file_path, 'r', encoding='utf-8') as f:
-        hardening_advice = f.read()
+        if running_config:
+            diff_result = list(difflib.unified_diff(running_config.splitlines(), hardening_advice.splitlines()))
 
-    # Retrieve the running configuration
-    commands = ['show running-config']
-    running_config = telnet_session(router_ip_address, router_username, router_password, enable_password, commands)
-
-    if running_config:
-        # Compare the running configuration to hardening advice
-        diff = difflib.unified_diff(running_config.splitlines(), hardening_advice.splitlines())
-        diff_result = '\n'.join(diff)
-
-        if len(diff_result) > 0:
-            print("Differences found with hardening advice:")
-            print(diff_result)
+            if diff_result:
+                logging.info('Differences found with hardening advice:')
+                for line in diff_result:
+                    print(line)
+            else:
+                logging.info("No significant differences found with hardening advice.")
         else:
-            print("No significant differences found with hardening advice.")
-    else:
-        print("Failed to retrieve the running configuration.")
+            logging.error("Failed to retrieve the running configuration.")
 
+    except FileNotFoundError:
+        logging.error("Hardening advice file not found. Please check the file path.")
 
-# Main execution
-compare_running_config_with_hardening_advice()
+# Function to configure syslog
+def configure_syslog():
+    logging.info('Configuring syslog...')
+    # Implement syslog configuration logic here
+
+# Function to display menu and execute selected option
+def display_menu():
+    while True:
+        print('\nMenu:')
+        print('
+
