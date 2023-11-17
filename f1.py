@@ -110,7 +110,6 @@ router_password = 'cisco123!'
 enable_password = 'class123!'
 hardening_advice_file_path = 'hardening_advice.txt'  # Path to the hardening advice file
 
-
 # Function to establish a Telnet session and execute commands
 def telnet_session(ip, username, password, enable_password, commands):
     try:
@@ -140,31 +139,37 @@ def telnet_session(ip, username, password, enable_password, commands):
         print(f'Telnet Session Failed: {e}')
         return None
 
-
 # Function to compare running configuration with hardening advice
 def compare_running_config_with_hardening_advice():
-    # Check if hardening advice file exists
-    if not os.path.exists(hardening_advice_file_path):
-        print(f"Hardening advice file not found: {hardening_advice_file_path}")
-        return
+    try:
+        # Check if hardening advice file exists
+        if not os.path.exists(hardening_advice_file_path):
+            print(f"Hardening advice file not found: {hardening_advice_file_path}")
+            return
 
-    # Read hardening advice from file
-    with open(hardening_advice_file_path, 'r', encoding='utf-8') as f:
-        hardening_advice = f.read()
+        # Read hardening advice from file
+        with open(hardening_advice_file_path, 'r', encoding='utf-8') as f:
+            hardening_advice = f.read()
 
-    # Retrieve the running configuration
-    commands = ['show running-config']
-    running_config = telnet_session(router_ip_address, router_username, router_password, enable_password, commands)
+        # Retrieve the running configuration
+        commands = ['show running-config']
+        running_config = telnet_session(router_ip_address, router_username, router_password, enable_password, commands)
 
-    if running_config:
-        # Compare the running configuration to hardening advice
-        diff = difflib.unified_diff(running_config.splitlines(), hardening_advice.splitlines())
-        diff_result = '\n'.join(diff)
+        if running_config:
+            # Compare the running configuration to hardening advice
+            diff = difflib.unified_diff(running_config.splitlines(), hardening_advice.splitlines())
+            diff_result = '\n'.join(diff)
 
-        if len(diff_result) > 0:
-            print("Differences found with hardening advice:")
-            print(diff_result)
+            if len(diff_result) > 0:
+                print("Differences found with hardening advice:")
+                print(diff_result)
+            else:
+                print("No significant differences found with hardening advice.")
         else:
-            print("No significant differences found with hardening advice.")
-    else:
-        print("Failed to retrieve the running configuration.")
+            print("Failed to retrieve the running configuration.")
+
+    except Exception as e:
+        print(f'Error comparing configurations: {e}')
+
+# Main execution
+compare_running_config_with_hardening_advice()
