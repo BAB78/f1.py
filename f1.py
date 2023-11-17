@@ -99,9 +99,9 @@ display_menu()
 
 
 
-
 import telnetlib
 import difflib
+import os
 
 # Define common variables
 router_ip_address = '192.168.56.101'
@@ -142,24 +142,27 @@ def telnet_session(ip, username, password, enable_password, commands):
 # Function to compare running configuration with hardening advice
 def compare_running_config_with_hardening_advice():
     try:
-        with open(hardening_advice_file_path, 'r') as f:
-            hardening_advice = f.read()
+        if os.path.exists(hardening_advice_file_path):
+            with open(hardening_advice_file_path, 'r') as f:
+                hardening_advice = f.read()
 
-        commands = ['show running-config']
+            commands = ['show running-config']
 
-        running_config = telnet_session(router_ip_address, router_username, router_password, enable_password, commands)
+            running_config = telnet_session(router_ip_address, router_username, router_password, enable_password, commands)
 
-        if running_config:
-            diff = difflib.unified_diff(running_config.splitlines(), hardening_advice.splitlines())
-            diff_result = '\n'.join(diff)
-            if len(diff_result) > 0:
-                print(diff_result)
+            if running_config:
+                diff = difflib.unified_diff(running_config.splitlines(), hardening_advice.splitlines())
+                diff_result = '\n'.join(diff)
+                if len(diff_result) > 0:
+                    print(diff_result)
+                else:
+                    print("No differences found with hardening advice.")
             else:
-                print("No differences found with hardening advice.")
+                print("Failed to retrieve the running configuration.")
         else:
-            print("Failed to retrieve the running configuration.")
-    except FileNotFoundError:
-        print("Hardening advice file not found. Please check the file path.")
+            print("Hardening advice file not found. Please check the file path.")
+    except Exception as e:
+        print(f"Error occurred: {e}")
 
 # Function to configure syslog
 def configure_syslog():
