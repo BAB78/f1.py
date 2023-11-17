@@ -1,15 +1,11 @@
 import telnetlib
 import difflib
-import os
 
 # Define common variables
 ip_address = '192.168.56.101'
 username = 'cisco'
 password = 'cisco123!'
-enable_password = 'class123!'
-output_file = 'running_config.txt'  # Name of the local file to save the running configuration
-offline_config_file = 'startup_config.txt'  # Path to save the startup configuration
-running_config_telnet = None
+enable_password = 'cisco123!'
 
 # Function to handle Telnet login and command execution
 def telnet_session(ip, user, passwd, enable_pass, command):
@@ -19,6 +15,8 @@ def telnet_session(ip, user, passwd, enable_pass, command):
         tn.write(user.encode('utf-8') + b'\n')
         tn.read_until(b'Password: ', timeout=10)
         tn.write(passwd.encode('utf-8') + b'\n')
+        tn.read_until(b'>', timeout=10)
+        tn.write(b'enable\n')
         tn.read_until(b'Password: ', timeout=10)
         tn.write(enable_pass.encode('utf-8') + b'\n')
 
@@ -49,10 +47,16 @@ def compare_with_hardening_advice():
 
     running_config = telnet_session(ip_address, username, password, enable_password, 'show running-config')
 
-    diff = difflib.unified_diff(running_config.splitlines(), hardening_advice.splitlines())
-
-    for line in diff:
-        print(line)
+    if running_config:
+        diff = difflib.unified_diff(running_config.splitlines(), hardening_advice.splitlines())
+        diff_result = '\n'.join(diff)
+        if len(diff_result) > 0:
+            print("Differences found with hardening advice:")
+            print(diff_result)
+        else:
+            print("No differences found with hardening advice.")
+    else:
+        print("Failed to retrieve the running configuration.")
 
 # Function to configure syslog
 def configure_syslog():
@@ -75,7 +79,7 @@ def configure_syslog():
         tn.read_until(b'#', timeout=10)
         tn.write(b'write memory\n')
         
-        print("Syslog configured successfully.")
+        print("Syslog configured successfully for event logging and monitoring.")
         tn.close()
     except Exception as e:
         print(f"Error configuring syslog: {e}")
@@ -84,20 +88,20 @@ def configure_syslog():
 def display_menu():
     while True:
         print('\nMenu:')
-        print('5. Compare the current running configuration against Cisco device hardening advice')
-        print('6. Configure syslog for event logging and monitoring')
-        print('7. Exit')
+        print('1. Compare the current running configuration against Cisco device hardening advice')
+        print('2. Configure syslog for event logging and monitoring')
+        print('3. Exit')
 
-        choice = input('Enter your choice (5-7): ')
+        choice = input('Enter your choice (1-3): ')
 
-        if choice == '5':
+        if choice == '1':
             compare_with_hardening_advice()
-        elif choice == '6':
+        elif choice == '2':
             configure_syslog()
-        elif choice == '7':
+        elif choice == '3':
             break
         else:
-            print('Invalid choice. Please enter a number between 5 and 7.')
+            print('Invalid choice. Please enter a number between 1 and 3.')
 
 # Main execution
 display_menu()
